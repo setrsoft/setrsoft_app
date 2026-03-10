@@ -1,0 +1,1 @@
+export { GymDashboard } from './GymDashboard';
