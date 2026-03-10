@@ -25,3 +25,13 @@ dist-ssr
 
 .env
 
+# Backend (Django)
+backend/.venv
+backend/__pycache__
+backend/*/__pycache__
+backend/.env
+backend/*.pyc
+backend/staticfiles/
+backend/media/
+backend/*.sqlite3
+
