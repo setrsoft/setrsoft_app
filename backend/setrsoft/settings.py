@@ -8,10 +8,10 @@ from pathlib import Path
 
 import dotenv
 
-# Load .env from backend directory (when running from repo root or backend/)
+# Load .env from repository root (single source of truth; see root .env.example).
 BASE_DIR = Path(__file__).resolve().parent.parent
-env_path = BASE_DIR / '.env'
-dotenv.load_dotenv(env_path)
+REPO_ROOT = BASE_DIR.parent
+dotenv.load_dotenv(REPO_ROOT / '.env')
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me')
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')

@@ -20,22 +20,14 @@ pip install -r requirements.txt
 
 ## Environment variables
 
-Copy the example file and set your values:
+Use the **repository root** template and file:
 
 ```bash
+# From the repository root (not inside backend/)
 cp .env.example .env
 ```
 
-| Variable | Description |
-|----------|-------------|
-| `SECRET_KEY` | Django secret key (required in production). |
-| `DEBUG` | Set to `True` for development, `False` in production. |
-| `ALLOWED_HOSTS` | Comma-separated list of allowed hosts (e.g. `localhost,127.0.0.1`). |
-| `POSTGRES_DB` | PostgreSQL database name. |
-| `POSTGRES_USER` | PostgreSQL user. |
-| `POSTGRES_PASSWORD` | PostgreSQL password. |
-| `POSTGRES_HOST` | PostgreSQL host (`localhost` when running locally, `db` when using Docker). |
-| `POSTGRES_PORT` | PostgreSQL port (default `5432`). |
+Variable names and descriptions live in **`/.env.example`**. Django loads **`/.env`** via `setrsoft/settings.py` (`REPO_ROOT / '.env'`).
 
 ## Database
 
@@ -57,7 +49,7 @@ The API will be available at `http://localhost:8000/`. Health check: `http://loc
 
 ## Docker (optional)
 
-From the repository root, ensure `backend/.env` exists (copy from `backend/.env.example` and set `POSTGRES_HOST=db` for the backend service, or use the defaults which point to the `db` service).
+From the repository root, ensure **`.env`** exists (copy from `.env.example`). Docker Compose sets `POSTGRES_HOST=db` inside the backend container; keep `POSTGRES_HOST=localhost` in `.env` for running Django on the host against a local PostgreSQL instance.
 
 Start both the database and the backend:
 

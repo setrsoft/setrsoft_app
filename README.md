@@ -1,73 +1,87 @@
-# React + TypeScript + Vite
+# SetterSoft
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Monorepo: **Django** API (`backend/`), **React + Vite** app (`frontend/`), **PostgreSQL**.
 
-Currently, two official plugins are available:
+## Environment variables
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+All variables are listed in **`.env.example`** at the repository root. Before running Docker Compose, copy it once:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Compose loads **`.env`** automatically for `${VAR}` substitution in the YAML files, and each service uses **`env_file: .env`** so containers receive the same values. Django reads the same **`.env`** from the repo root when you run `manage.py` locally (see `backend/setrsoft/settings.py`).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Development (Docker)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+From the repository root (after `cp .env.example .env`):
+
+```bash
+docker compose up
 ```
+
+This starts:
+
+| Service   | Role                         | URL / port        |
+| --------- | ---------------------------- | ----------------- |
+| `db`      | PostgreSQL                   | `localhost:5432`  |
+| `backend` | Django `runserver` (reload)  | `http://localhost:8000` |
+| `frontend`| Vite dev server (`npm run dev` in container) | `http://localhost:5173` |
+
+Open the app at **http://localhost:5173**. Set **`VITE_API_BASE=http://localhost:8000`** in `.env` so the browser calls the API on port 8000 when the SPA is not served from the same origin.
+
+First-time backend setup (migrations, superuser) is usually run inside the backend container, for example:
+
+```bash
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py createsuperuser
+```
+
+## Production (Docker)
+
+Production uses **`docker-compose.prod.yml`**: Nginx serves the built SPA and proxies `/api/` and `/admin/` to Gunicorn. Only **port 80** is published; the database and Django are not exposed on the host.
+
+Required in **`.env`** at the repository root (or exported in your shell):
+
+- `POSTGRES_PASSWORD`
+- `SECRET_KEY`
+
+See **`.env.example`** for the full list. Optional values such as `POSTGRES_DB`, `POSTGRES_USER`, `DEBUG`, `ALLOWED_HOSTS`, `TRUST_PROXY`, and **`VITE_API_BASE`** (passed as a Docker **build arg** for the `web` image when you need an absolute API URL in the built SPA) are documented there.
+
+**Start production stack** (build images, run detached):
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+With inline env (example):
+
+```bash
+POSTGRES_PASSWORD=your-secure-password SECRET_KEY=your-django-secret-key docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Then open **http://localhost** (or your server’s hostname). Use **`ALLOWED_HOSTS`** (and HTTPS + `TRUST_PROXY` as already set in compose) when deploying under a real domain.
+
+**Stop:**
+
+```bash
+docker compose -f docker-compose.prod.yml down
+```
+
+## Local frontend without Docker
+
+You can still run Vite on the host:
+
+```bash
+cd frontend && npm install && npm run dev
+```
+
+Use this if you prefer not to use the `frontend` service from `docker compose up`.
+
+## Project layout
+
+- `.env.example` — template for all services (Django, PostgreSQL, Vite)
+- `backend/` — Django project (`setrsoft`), API under `/api/`
+- `frontend/` — Vite + React SPA; production image builds static assets and serves them with Nginx
+- `docker-compose.yml` — development
+- `docker-compose.prod.yml` — production
