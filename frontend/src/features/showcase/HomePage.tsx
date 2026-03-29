@@ -1,9 +1,39 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/core/config';
 
 export function HomePage() {
   const { t } = useTranslation();
+  const [repoStats, setRepoStats] = useState<null | { stars: number; forks: number }>(null);
+  const [repoStatsError, setRepoStatsError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch('https://api.github.com/repos/setrsoft/setrsoft_app')
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setRepoStats({
+          stars: Number(data?.stargazers_count ?? 0),
+          forks: Number(data?.forks_count ?? 0),
+        });
+        setRepoStatsError(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // Keep the UI stable if GitHub rate-limits/blocks this request.
+        setRepoStatsError(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="flex flex-col gap-24 py-12 md:py-20 animate-fade-in">
@@ -59,19 +89,31 @@ export function HomePage() {
             <div className="flex gap-4 mb-8">
               <div className="flex items-center gap-1.5 text-sm text-on-surface-variant font-tabular-nums">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                <span>358 Stars</span>
+                <span>
+                  {repoStats
+                    ? `${repoStats.stars.toLocaleString()} Stars`
+                    : repoStatsError
+                      ? `— Stars`
+                      : 'Loading...'}
+                </span>
               </div>
               <div className="flex items-center gap-1.5 text-sm text-on-surface-variant font-tabular-nums">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><circle cx="18" cy="6" r="3"></circle><path d="M18 9v1a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2V9"></path><path d="M12 12v3"></path></svg>
-                <span>42 Forks</span>
+                <span>
+                  {repoStats
+                    ? `${repoStats.forks.toLocaleString()} Forks`
+                    : repoStatsError
+                      ? `— Forks`
+                      : 'Loading...'}
+                </span>
               </div>
             </div>
           </div>
           <div>
             <a 
-              href="https://github.com/Eloidm/setrsoft" 
+              href="https://github.com/setrsoft/setrsoft_app"
               target="_blank" 
-              rel="noreferrer"
+              rel="noreferrer noopener"
               className="inline-flex items-center gap-2 text-mint font-medium hover:underline underline-offset-4"
             >
               {t('split.dev_btn')}
