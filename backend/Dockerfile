@@ -1,4 +1,4 @@
-# SetterSoft backend API (Django + Gunicorn)
+# setrsoft backend API (Django + Gunicorn)
 FROM python:3.12-slim
 
 WORKDIR /app

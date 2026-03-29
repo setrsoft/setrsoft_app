@@ -1,6 +1,6 @@
-# SetterSoft Backend
+# setrsoft Backend
 
-Django REST API for SetterSoft. Uses PostgreSQL and is configured via environment variables.
+Django REST API for setrsoft. Uses PostgreSQL and is configured via environment variables.
 
 ## Prerequisites
 
