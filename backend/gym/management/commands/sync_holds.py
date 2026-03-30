@@ -16,7 +16,7 @@ import urllib.request
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from gym.models import HoldType
+from gym.models import Gym, HoldInstance, HoldType
 
 # train.jsonl is in the repo root of the HF dataset
 TRAIN_JSONL_URL = "{base}/train.jsonl"
@@ -57,6 +57,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dry_run = options['dry_run']
+        demo_gym = Gym.objects.filter(id=1).first()
 
         if options['source']:
             lines = self._read_local(options['source'])
@@ -106,6 +107,18 @@ class Command(BaseCommand):
                 created += 1
             else:
                 updated += 1
+
+            # Ensure every hold type is available in the demo gym
+            if demo_gym:
+                usage = 'volume' if hold_type_value == 'volume' else 'hold'
+                HoldInstance.objects.get_or_create(
+                    gym=demo_gym,
+                    hold_type=obj,
+                    defaults={
+                        'name': f"{defaults['manufacturer']} — {defaults['model']}",
+                        'usage_type': usage,
+                    },
+                )
 
         if dry_run:
             self.stdout.write(self.style.WARNING("Dry run — no changes written."))

@@ -1,5 +1,6 @@
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import { Suspense } from "react";
 import { useDragStore, usePlacementStore } from "../store";
 import type { PlacedObject } from "../store";
 import ModelViewer from "./ModelViewer";
@@ -498,8 +499,9 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
         setIsWallLoading(false);
       }
     } else {
-      // Reset ref when wallModels is empty
+      // No wall available — clear ref and stop loading overlay
       wallAddedRef.current = null;
+      setIsWallLoading(false);
     }
   }, [wallModels, addObject, updateObject, objects]);
 
@@ -549,8 +551,10 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
           <meshBasicMaterial color="#e0f2fe" wireframe />
         </mesh>
 
-        <PlacedObjects onWallLoadComplete={handleWallLoadComplete} />
-        <DragPreview />
+        <Suspense fallback={null}>
+          <PlacedObjects onWallLoadComplete={handleWallLoadComplete} />
+          <DragPreview />
+        </Suspense>
         <OrbitControls enabled={!dragging} dampingFactor={1} />
       </Canvas>
     </div>

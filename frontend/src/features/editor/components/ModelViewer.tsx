@@ -12,7 +12,7 @@ interface ModelViewerProps extends ComponentProps<"group"> {
   onLoadComplete?: () => void; // callback when loading is complete
 }
 
-const ModelViewer = ({
+const ModelViewerInner = ({
   url,
   position = [0, 0, 0],
   color,
@@ -20,15 +20,8 @@ const ModelViewer = ({
   onLoadComplete,
   ...props
 }: ModelViewerProps) => {
-  // Early return if url is not valid
-  if (!url) {
-    return null;
-  }
-
   useEffect(() => {
-    if (url) {
-      useGLTF.preload(url);
-    }
+    useGLTF.preload(url);
   }, [url]);
 
   const { scene } = useGLTF(url);
@@ -143,6 +136,12 @@ const ModelViewer = ({
       <primitive object={clonedScene} />
     </group>
   );
+};
+
+// Null-guard wrapper — keeps hooks unconditional inside ModelViewerInner
+const ModelViewer = (props: ModelViewerProps) => {
+  if (!props.url) return null;
+  return <ModelViewerInner {...props} />;
 };
 
 export default ModelViewer;

@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
-import { useEditorAuth } from "./mocks/useEditorAuth";
 import useWallSessionQuery from "./utils/WallSessionQuery";
 import { usePlacementStore } from "./store";
 import { useHandleLoadSession } from "./utils/HandleLoadSession";
@@ -19,9 +18,6 @@ function EditorApp() {
   const { wallId } = useParams<{ wallId: string }>();
   const { fetchWallSession } = useWallSessionQuery();
   const { t } = useTranslation();
-  const API_URL = import.meta.env.VITE_API_BASE;
-  const { user, authenticatedFetch } = useEditorAuth();
-
   const [wallModels, setWallModels] = useState<string[]>([]);
 
   const setObjects = usePlacementStore((s) => s.setObjects);
@@ -72,48 +68,12 @@ function EditorApp() {
   const holdModels: Array<Record<string, any>> = [];
   const holdModelsGLBURL: string[] = [];
 
-  // Ref to track blob URLs for cleanup on session change / unmount
-  const wallModelsRef = useRef<string[]>([]);
-
+  // Use glb_url from the serializer directly (HF CDN or local media URL)
+  // No fetch/blob needed — three.js loads URLs directly
   useEffect(() => {
-    const loadWallGLB = async () => {
-      wallModelsRef.current.forEach((url) => {
-        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
-      });
-
-      if (session_data?.related_wall) {
-        try {
-          const res = await authenticatedFetch(
-            `${API_URL}/gym/getwallfile/${session_data.related_wall.id}/`
-          );
-          if (res.ok) {
-            const blob = await res.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            setWallModels([blobUrl]);
-            wallModelsRef.current = [blobUrl];
-          } else {
-            setWallModels([]);
-            wallModelsRef.current = [];
-          }
-        } catch {
-          setWallModels([]);
-          wallModelsRef.current = [];
-        }
-      } else {
-        setWallModels([]);
-        wallModelsRef.current = [];
-      }
-    };
-
-    loadWallGLB();
-
-    return () => {
-      wallModelsRef.current.forEach((url) => {
-        if (url.startsWith("blob:")) URL.revokeObjectURL(url);
-      });
-      wallModelsRef.current = [];
-    };
-  }, [session_data?.related_wall?.id]);
+    const glbUrl = session_data?.related_wall?.glb_url;
+    setWallModels(glbUrl ? [glbUrl] : []);
+  }, [session_data?.related_wall?.glb_url]);
 
   if (session_data?.related_holds_collection) {
     session_data.holds_collection_instances?.forEach((hold: any) => {
