@@ -72,6 +72,9 @@ function EditorApp() {
   // No fetch/blob needed — three.js loads URLs directly
   useEffect(() => {
     const glbUrl = session_data?.related_wall?.glb_url;
+    console.log("[EditorApp] session_data:", session_data);
+    console.log("[EditorApp] related_wall:", session_data?.related_wall);
+    console.log("[EditorApp] glb_url:", glbUrl);
     setWallModels(glbUrl ? [glbUrl] : []);
   }, [session_data?.related_wall?.glb_url]);
 
@@ -88,7 +91,12 @@ function EditorApp() {
 
   const { preload } = useGLTF;
   useEffect(() => {
-    [...wallModels, ...holdModelsGLBURL].forEach((url) => preload(url));
+    console.log("[EditorApp] wallModels:", wallModels);
+    console.log("[EditorApp] holdModelsGLBURL:", holdModelsGLBURL);
+    [...wallModels, ...holdModelsGLBURL].forEach((url) => {
+      console.log("[EditorApp] Preloading GLB:", url);
+      preload(url);
+    });
   }, [preload, wallModels, holdModelsGLBURL]);
 
   useEffect(() => {

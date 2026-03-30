@@ -48,7 +48,9 @@ export default function AddHoldModal({
   const { data, isLoading, error, isError } = useQuery({
     queryKey: ["gymstocks", gym_id, page],
     queryFn: async () => {
+      console.log("[AddHoldModal] gym_id:", gym_id, "| API_URL:", API_URL);
       if (!gym_id || !API_URL) {
+        console.warn("[AddHoldModal] Missing gym_id or API_URL, returning empty");
         return { count: 0, stock: [], holds: [] };
       }
       let url: string;
@@ -68,14 +70,19 @@ export default function AddHoldModal({
         });
         url = `${baseUrl}/gym/stock-explore/${gym_id}/?${params.toString()}`;
       }
+      console.log("[AddHoldModal] Fetching stock from:", url);
       const response = await authenticatedFetch(url);
+      console.log("[AddHoldModal] Stock response status:", response.status);
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
+        console.error("[AddHoldModal] Stock fetch error:", errorBody);
         throw new Error(
           errorBody.message || `Failed to fetch (status ${response.status})`
         );
       }
-      return await response.json();
+      const json = await response.json();
+      console.log("[AddHoldModal] Stock data:", json);
+      return json;
     },
     enabled: isOpen && !!gym_id,
     staleTime: 2 * 60 * 1000,

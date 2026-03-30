@@ -7,9 +7,13 @@ export const DEMO_USER = {
   related_gym_id: '1',
 };
 
+function authenticatedFetch(url: string, options?: RequestInit) {
+  return fetch(url, { credentials: "include", ...options });
+}
+
 export function useEditorAuth() {
   return {
     user: DEMO_USER,
-    authenticatedFetch: fetch,
+    authenticatedFetch,
   };
 }

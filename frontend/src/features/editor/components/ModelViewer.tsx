@@ -21,14 +21,17 @@ const ModelViewerInner = ({
   ...props
 }: ModelViewerProps) => {
   useEffect(() => {
+    console.log("[ModelViewer] Preloading URL:", url);
     useGLTF.preload(url);
   }, [url]);
 
+  console.log("[ModelViewer] Loading GLB:", url);
   const { scene } = useGLTF(url);
   const textureRef = useRef<THREE.Texture | null>(null);
 
   // useGLTF suspends until loaded; call onLoadComplete after mount
   useEffect(() => {
+    console.log("[ModelViewer] GLB loaded successfully:", url);
     if (onLoadComplete) {
       onLoadComplete();
     }

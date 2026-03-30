@@ -463,6 +463,8 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
   const wallAddedRef = useRef<string | null>(null);
   
   useEffect(() => {
+    console.log("[MainCanvas] wallModels:", wallModels);
+    console.log("[MainCanvas] objects (walls):", objects.filter(o => o.type === "wall"));
     // Reset ref when wallModels change to allow adding wall for new sessions
     if (wallModels && wallModels.length > 0) {
       const currentWallUrl = wallModels[0];
@@ -472,19 +474,24 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
         const existingWallWithUrl = objects.find(
           (o) => o.type === "wall" && o.url === currentWallUrl
         );
-        
+
         // Check if a wall exists but without URL (loaded from layout)
         const existingWallWithoutUrl = objects.find(
           (o) => o.type === "wall" && (!o.url || o.wall_id)
         );
-        
+
+        console.log("[MainCanvas] existingWallWithUrl:", existingWallWithUrl);
+        console.log("[MainCanvas] existingWallWithoutUrl:", existingWallWithoutUrl);
+
         if (existingWallWithoutUrl && !existingWallWithUrl) {
+          console.log("[MainCanvas] Updating existing wall with URL:", currentWallUrl);
           // Update existing wall with the correct URL
           updateObject(existingWallWithoutUrl.id, {
             url: currentWallUrl,
             wall_id: undefined, // Remove wall_id reference now that we have the URL
           });
         } else if (!existingWallWithUrl && !existingWallWithoutUrl) {
+          console.log("[MainCanvas] Adding new wall with URL:", currentWallUrl);
           // No wall exists, add a new one
           addObject({
             id: uuidv4(),
@@ -494,11 +501,14 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
             rotation: [0, 0, 0, 1],
             orientation: "y-up",
           });
+        } else {
+          console.log("[MainCanvas] Wall already exists, skipping add");
         }
         wallAddedRef.current = currentWallUrl;
         setIsWallLoading(false);
       }
     } else {
+      console.log("[MainCanvas] No wallModels, clearing wall");
       // No wall available — clear ref and stop loading overlay
       wallAddedRef.current = null;
       setIsWallLoading(false);
