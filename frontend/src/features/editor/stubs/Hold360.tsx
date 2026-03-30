@@ -8,7 +8,7 @@ import * as THREE from "three";
  * IntersectionObserver to that container — preventing WebGL renders from
  * appearing outside the container's visible area.
  */
-export const HoldScrollContext = createContext<React.RefObject<HTMLElement> | null>(null);
+export const HoldScrollContext = createContext<React.RefObject<HTMLElement | null> | null>(null);
 
 function HoldScene({ url }: { url: string }) {
   const { scene } = useGLTF(url);
