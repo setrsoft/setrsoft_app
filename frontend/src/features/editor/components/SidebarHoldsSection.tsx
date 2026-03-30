@@ -55,7 +55,7 @@ const SidebarHoldsSection = forwardRef<
   const setHoldColor = usePlacementStore((s) => s.setHoldColor);
   const { t } = useTranslation();
   const { user, authenticatedFetch } = useEditorAuth();
-  const API_URL = (import.meta as any).env.VITE_API_BASE;
+  const API_URL = import.meta.env.VITE_API_BASE;
   const [_currentDownloadUrl, setCurrentDownloadUrl] = useState<string>();
 
   const { data: stockData } = useQuery({
@@ -89,7 +89,7 @@ const SidebarHoldsSection = forwardRef<
   const handleDelete = async (hold: HoldModel) => {
     setModels(models.filter((m) => m.hold_type.id !== hold.hold_type.id));
     await authenticatedFetch(
-      `${API_URL}/changeholdtosessioncollection/${session_data.id}/0/${hold.id}`
+      `${API_URL}/gym/changeholdtosessioncollection/${session_data.id}/0/${hold.id}/`
     );
   };
 

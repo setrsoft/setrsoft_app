@@ -37,7 +37,7 @@ const FileManager = ({ session_data }: { session_data: any }) => {
       localStorage.setItem("rockClimbState", JSON.stringify(state));
 
       if (session_data?.id) {
-        const API_URL = (import.meta as any).env.VITE_API_BASE;
+        const API_URL = import.meta.env.VITE_API_BASE;
         const url = `${API_URL}/gym/wallsession/update/${session_data.id}`;
         await authenticatedFetch(url, {
           method: "PUT",
@@ -61,7 +61,7 @@ const FileManager = ({ session_data }: { session_data: any }) => {
       localStorage.setItem("rockClimbState", JSON.stringify(state));
 
       if (session_data?.id) {
-        const API_URL = (import.meta as any).env.VITE_API_BASE;
+        const API_URL = import.meta.env.VITE_API_BASE;
         const url = `${API_URL}/gym/wallsession/update/${session_data.id}`;
         await authenticatedFetch(url, {
           method: "PUT",
@@ -80,7 +80,7 @@ const FileManager = ({ session_data }: { session_data: any }) => {
 
   const handleSessionNameChange = () => {
     if (!session_data?.id) return;
-    const API_URL = (import.meta as any).env.VITE_API_BASE;
+    const API_URL = import.meta.env.VITE_API_BASE;
     (async () => {
       try {
         const url = `${API_URL}/gym/setwallsessionname/${session_data.id}`;

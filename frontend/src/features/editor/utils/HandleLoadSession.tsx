@@ -2,8 +2,9 @@ import { useCallback } from "react";
 import { useEditorAuth } from "../mocks/useEditorAuth";
 import { usePlacementStore } from "../store";
 
+
 export const useHandleLoadSession = (session_data: any) => {
-  const { authenticatedFetch, user } = useEditorAuth();
+  const { authenticatedFetch } = useEditorAuth();
 
   const setObjects = usePlacementStore((s) => s.setObjects);
   const setWallColors = usePlacementStore((s) => s.setWallColors);
@@ -24,15 +25,6 @@ export const useHandleLoadSession = (session_data: any) => {
             return;
           }
           const responseData = await response.json();
-
-          if (user && user.url_request_key && responseData.layout) {
-            const urlKeyRegex =
-              /(\/get(?:wall|holdfile)[^"']*\/)(\d{5})(?=["'])/g;
-            responseData.layout = responseData.layout.replace(
-              urlKeyRegex,
-              (_match: string, prefix: string) => prefix + user.url_request_key
-            );
-          }
 
           let layoutString = responseData.layout;
           if (!layoutString || typeof layoutString !== "string") {
@@ -78,7 +70,6 @@ export const useHandleLoadSession = (session_data: any) => {
   }, [
     session_data?.id,
     authenticatedFetch,
-    user,
     setObjects,
     setWallColors,
     setHoldColors,

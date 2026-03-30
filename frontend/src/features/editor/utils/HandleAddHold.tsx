@@ -13,8 +13,7 @@ interface SelectedHold {
 export default async function HandleAddHold(
   selectedHold: SelectedHold,
   _session_data: unknown,
-  onHoldAdded: ((hold: any) => void) | undefined,
-  user: { url_request_key?: string } | null
+  onHoldAdded: ((hold: any) => void) | undefined
 ) {
   try {
     const API_URL = import.meta.env.VITE_API_BASE;
@@ -25,9 +24,7 @@ export default async function HandleAddHold(
       file: selectedHold.hold_type.cdn_ref,
       hold_type: {
         ...selectedHold.hold_type,
-        glb_url: `${API_URL}/gym/getholdfile/hold/${
-          selectedHold.hold_type.id
-        }/0/${user?.url_request_key ?? ""}`,
+        glb_url: `${API_URL}/gym/getholdfile/hold/${selectedHold.hold_type.id}/`,
       },
     };
 

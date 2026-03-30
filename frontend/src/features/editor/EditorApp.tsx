@@ -19,7 +19,7 @@ function EditorApp() {
   const { wallId } = useParams<{ wallId: string }>();
   const { fetchWallSession } = useWallSessionQuery();
   const { t } = useTranslation();
-  const API_URL = (import.meta as any).env.VITE_API_BASE;
+  const API_URL = import.meta.env.VITE_API_BASE;
   const { user, authenticatedFetch } = useEditorAuth();
 
   const [wallModels, setWallModels] = useState<string[]>([]);
@@ -81,10 +81,10 @@ function EditorApp() {
         if (url.startsWith("blob:")) URL.revokeObjectURL(url);
       });
 
-      if (session_data?.related_wall && user?.url_request_key) {
+      if (session_data?.related_wall) {
         try {
           const res = await authenticatedFetch(
-            `${API_URL}/gym/getwallfile/${session_data.related_wall.id}/${user.url_request_key}`
+            `${API_URL}/gym/getwallfile/${session_data.related_wall.id}/`
           );
           if (res.ok) {
             const blob = await res.blob();
@@ -113,11 +113,11 @@ function EditorApp() {
       });
       wallModelsRef.current = [];
     };
-  }, [session_data?.related_wall?.id, user?.url_request_key]);
+  }, [session_data?.related_wall?.id]);
 
   if (session_data?.related_holds_collection) {
     session_data.holds_collection_instances?.forEach((hold: any) => {
-      const glbUrl = `${API_URL}/gym/getholdfile/hold/${hold.hold_type.id}/0/${user?.url_request_key}`;
+      const glbUrl = `${API_URL}/gym/getholdfile/hold/${hold.hold_type.id}/`;
       hold.hold_type.glb_url = glbUrl;
       hold.hold_instance_id = hold.id;
       holdModels.push(hold);

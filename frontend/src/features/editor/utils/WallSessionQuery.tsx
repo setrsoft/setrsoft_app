@@ -10,7 +10,7 @@ const MOCK_SESSION = {
 
 export default function useWallSessionQuery() {
   const { authenticatedFetch } = useEditorAuth();
-  const API_URL = (import.meta as any).env.VITE_API_BASE;
+  const API_URL = import.meta.env.VITE_API_BASE;
 
   const fetchWallSession = async (wallId: string) => {
     try {

@@ -34,7 +34,7 @@ export default function AddHoldModal({
   const [addedHoldIds, setAddedHoldIds] = useState<Set<number>>(new Set());
   const { user, authenticatedFetch } = useEditorAuth();
   const [page, setPage] = useState(1);
-  const API_URL = (import.meta as any).env.VITE_API_BASE;
+  const API_URL = import.meta.env.VITE_API_BASE;
   const { t } = useTranslation();
   const gym_id = user?.related_gym_id;
 
@@ -122,7 +122,7 @@ export default function AddHoldModal({
   const handleAddHoldClick = async (hold: any) => {
     setIsAdding(true);
     try {
-      const result = await HandleAddHold(hold, session_data, onHoldAdded, user);
+      const result = await HandleAddHold(hold, session_data, onHoldAdded);
       if (result.success) {
         await authenticatedFetch(
           `${API_URL}/gym/changeholdtosessioncollection/${session_data.id}/1/${hold.id}`

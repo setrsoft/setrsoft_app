@@ -95,7 +95,7 @@ export function useHoldAvailabilityValidation() {
 
   const extractHoldTypeIdFromUrl = (url: string) => {
     if (!url) return null;
-    const match = url.match(/\/gym\/getholdfile\/hold\/(\d+)\/\d+\/\d+/);
+    const match = url.match(/\/gym\/getholdfile\/hold\/(\d+)\//);
     return match ? parseInt(match[1]) : null;
   };
 

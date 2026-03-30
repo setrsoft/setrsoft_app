@@ -4,7 +4,6 @@
 
 export const DEMO_USER = {
   id: 'demo',
-  url_request_key: '00000',
   related_gym_id: '1',
 };
 
