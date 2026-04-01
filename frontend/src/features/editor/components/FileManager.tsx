@@ -99,10 +99,16 @@ const FileManager = ({ session_data }: { session_data: any }) => {
   return (
     <div className="fixed top-4 left-4 flex items-center" style={{ minWidth: 180 }}>
       <button id="back-button" className="p-2 cursor-pointer" onClick={handleSaveAndNavigate}>
-        <img src="/icons/rewind.svg" className="w-8 h-8" alt="back" />
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label={t("back")}>
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
       </button>
       <div id="save-button" className="p-2 cursor-pointer" onClick={handleSave}>
-        <img src="/icons/save.svg" className="w-8 h-8" alt="save" />
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label={t("save")}>
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+          <polyline points="17 21 17 13 7 13 7 21" />
+          <polyline points="7 3 7 8 15 8" />
+        </svg>
       </div>
       <input
         type="text"
