@@ -16,7 +16,7 @@ dotenv.load_dotenv(REPO_ROOT / '.env')
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me')
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 ALLOWED_HOSTS = [
-    h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()
+    h.strip() for h in os.environ.get('ALLOWED_HOSTS', '0.0.0.0,localhost,127.0.0.1').split(',') if h.strip()
 ]
 
 _TRUST_PROXY = os.environ.get('TRUST_PROXY', '').lower() in ('1', 'true', 'yes')
