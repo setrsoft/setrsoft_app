@@ -11,9 +11,17 @@ import MainCanvas from "./components/MainCanvas";
 import Sidebar from "./components/Sidebar";
 import HoldInspector from "./components/HoldInspector";
 import FileManager from "./components/FileManager";
-import HoldPreviewCanvas from "./components/HoldPreviewCanvas";
 import { useTranslation } from "react-i18next";
 import Tutorial from "./components/Tutorial";
+
+interface HoldInstance {
+  id: string;
+  hold_instance_id?: string;
+  hold_type?: {
+    glb_url?: string;
+  };
+  [key: string]: unknown; 
+}
 
 function EditorApp() {
   const { wallId } = useParams<{ wallId: string }>();
@@ -66,22 +74,18 @@ function EditorApp() {
   }, [hasUnsavedChanges, t]);
 
   // Collect hold models from session data
-  const holdModels: Array<Record<string, any>> = [];
+  const holdModels: Array<Record<string, HoldInstance>> = [];
   const holdModelsGLBURL: string[] = [];
 
   // Use glb_url from the serializer directly (HF CDN or local media URL)
   // No fetch/blob needed — three.js loads URLs directly
   useEffect(() => {
     const glbUrl = session_data?.related_wall?.glb_url;
-    console.log("[EditorApp] session_data:", session_data);
-    console.log("[EditorApp] related_wall:", session_data?.related_wall);
-    console.log("[EditorApp] glb_url:", glbUrl);
     setWallModels(glbUrl ? [glbUrl] : []);
   }, [session_data?.related_wall?.glb_url]);
 
   if (session_data?.related_holds_collection) {
     session_data.holds_collection_instances?.forEach((hold: any) => {
-      // glb_url is provided directly by the serializer (HF CDN URL)
       hold.hold_instance_id = hold.id;
       holdModels.push(hold);
       if (hold.hold_type?.glb_url) {
@@ -92,10 +96,7 @@ function EditorApp() {
 
   const { preload } = useGLTF;
   useEffect(() => {
-    console.log("[EditorApp] wallModels:", wallModels);
-    console.log("[EditorApp] holdModelsGLBURL:", holdModelsGLBURL);
     [...wallModels, ...holdModelsGLBURL].forEach((url) => {
-      console.log("[EditorApp] Preloading GLB:", url);
       preload(url);
     });
   }, [preload, wallModels, holdModelsGLBURL]);
@@ -120,8 +121,6 @@ function EditorApp() {
 
   return (
     <div className="flex h-screen w-screen bg-blue-50 relative">
-      {/* Single shared WebGL canvas for all Hold360 previews */}
-      <HoldPreviewCanvas />
       <div className="w-4/5 h-full relative">
         <MainCanvas wallModels={wallModels} />
         <HoldInspector />
