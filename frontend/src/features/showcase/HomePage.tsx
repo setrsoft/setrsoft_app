@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/core/config';
+import { posthog } from '@/shared/analytics/posthog';
 
 export function HomePage() {
   const { t } = useTranslation();
@@ -48,16 +49,17 @@ export function HomePage() {
         </p>
         
         <div className="flex flex-col items-center gap-6">
-          <Link 
-            to={ROUTES.EDITOR} 
+          <Link
+            to={ROUTES.EDITOR}
             className="bg-gradient-to-br from-mint-dim to-mint text-on-primary font-bold px-8 py-3.5 rounded-sm transition-transform hover:scale-105 shadow-lg shadow-mint/20"
+            onClick={() => posthog.capture({ distinctId: 'anonymous', event: 'editor cta clicked', properties: { source: 'hero' } })}
           >
             {t('hero.test_editor')}
           </Link>
           
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
             <Link 
-              to="#" 
+              to="https://setrsoft.github.io/holds-dataset-hub/" 
               className="bg-surface-high text-white font-medium px-6 py-2.5 rounded-sm hover:bg-surface-lowest transition-colors border border-transparent hover:border-ghost-border/50 text-sm"
             >
               {t('hero.holds_database')}

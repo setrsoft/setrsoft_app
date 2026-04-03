@@ -15,6 +15,7 @@ export default defineConfig({
       '@/features': path.resolve(__dirname, 'src/features'),
       '@/app': path.resolve(__dirname, 'src/app'),
     },
+    conditions: ['edge', 'browser', 'module', 'import', 'default'],
   },
   server: {
     proxy: (() => {

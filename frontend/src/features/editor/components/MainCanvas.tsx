@@ -9,6 +9,7 @@ import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 import { useDragPreview } from "./useDragPreview";
 import React from "react";
+import { posthog } from "@/shared/analytics/posthog";
 
 function DragPreview() {
   const { model, dragging, endDrag } = useDragStore();
@@ -123,6 +124,13 @@ function DragPreview() {
           parentId,
           name: holdName,
         });
+        if (model.type === 'hold') {
+          posthog.capture({
+            distinctId: 'demo',
+            event: 'hold placed',
+            properties: { hold_name: holdName, has_parent: !!parentId },
+          });
+        }
 
         if (selectedObjId) {
           if (parentId) {
