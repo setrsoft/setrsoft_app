@@ -12,6 +12,7 @@ import { useEditorAuth } from "../mocks/useEditorAuth";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useGLTF } from "@react-three/drei";
+import { posthog } from "@/shared/analytics/posthog";
 
 type HoldModel = {
   name: string;
@@ -90,6 +91,11 @@ const SidebarHoldsSection = forwardRef<
 
   const handleDelete = async (hold: HoldModel) => {
     setModels(models.filter((m) => m.hold_type.id !== hold.hold_type.id));
+    posthog.capture({
+      distinctId: 'demo',
+      event: 'hold removed from collection',
+      properties: { hold_name: hold.name, hold_id: hold.id, session_id: session_data?.id },
+    });
     await authenticatedFetch(
       `${API_URL}/gym/changeholdtosessioncollection/${session_data.id}/0/${hold.id}/`
     );

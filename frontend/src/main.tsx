@@ -5,6 +5,7 @@ import { AuthProvider } from '@/shared/auth';
 import { App } from '@/app/App';
 import './index.css';
 import './i18n';
+import '@/shared/analytics/posthog';
 
 const queryClient = new QueryClient();
 

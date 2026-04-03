@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { posthog } from "@/shared/analytics/posthog";
 
 import useWallSessionQuery from "./utils/WallSessionQuery";
 import { usePlacementStore } from "./store";
@@ -44,6 +45,7 @@ function EditorApp() {
 
   const session_data = data?.wall_session || data;
   const { handleLoad } = useHandleLoadSession(session_data);
+  const sessionOpenedRef = useRef(false);
 
   useEffect(() => {
     if (wallId) {
@@ -58,6 +60,10 @@ function EditorApp() {
   useEffect(() => {
     if (session_data?.id && wallModels.length > 0) {
       handleLoad();
+      if (!sessionOpenedRef.current) {
+        sessionOpenedRef.current = true;
+        posthog.capture('editor session opened', { wall_id: wallId, session_id: session_data.id });
+      }
     }
   }, [session_data?.id, wallModels.length, handleLoad]);
 
