@@ -34,7 +34,17 @@
       "tutorial_rotate": "Left click — Rotate",
       "tutorial_pan": "Right click / Ctrl+click — Pan",
       "tutorial_zoom": "Scroll — Zoom",
-      "tutorial_center": "Double-click — Center"
+      "tutorial_center": "Double-click — Center",
+      "hold_info_title": "Hold information",
+      "hold_info_close": "Close",
+      "hold_info_name": "Name",
+      "hold_info_manufacturer": "Manufacturer",
+      "hold_info_usage_type": "Usage type",
+      "hold_info_stock": "Used / available (stock)",
+      "hold_info_color": "Stock color",
+      "hold_info_instance_id": "Instance ID",
+      "hold_info_hold_id": "Hold ID",
+      "hold_info_hold_type_id": "Hold type ID"
     },
     "footer": {
       "org": "SetRsoft organisation",

@@ -34,7 +34,17 @@
       "tutorial_rotate": "Left click — Rotate",
       "tutorial_pan": "Right click / Ctrl+click — Pan",
       "tutorial_zoom": "Scroll — Zoom",
-      "tutorial_center": "Double-click — Center"
+      "tutorial_center": "Double-click — Center",
+      "hold_info_title": "支点信息",
+      "hold_info_close": "关闭",
+      "hold_info_name": "名称",
+      "hold_info_manufacturer": "制造商",
+      "hold_info_usage_type": "用途类型",
+      "hold_info_stock": "已用 / 可用（库存）",
+      "hold_info_color": "库存颜色",
+      "hold_info_instance_id": "实例 ID",
+      "hold_info_hold_id": "支点 ID",
+      "hold_info_hold_type_id": "支点类型 ID"
     },
     "footer": {
       "org": "SetRsoft 组织",

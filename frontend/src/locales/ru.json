@@ -34,7 +34,17 @@
       "tutorial_rotate": "Left click — Rotate",
       "tutorial_pan": "Right click / Ctrl+click — Pan",
       "tutorial_zoom": "Scroll — Zoom",
-      "tutorial_center": "Double-click — Center"
+      "tutorial_center": "Double-click — Center",
+      "hold_info_title": "Информация о зацепке",
+      "hold_info_close": "Закрыть",
+      "hold_info_name": "Название",
+      "hold_info_manufacturer": "Производитель",
+      "hold_info_usage_type": "Тип использования",
+      "hold_info_stock": "Использовано / доступно (склад)",
+      "hold_info_color": "Цвет на складе",
+      "hold_info_instance_id": "ID экземпляра",
+      "hold_info_hold_id": "ID зацепки",
+      "hold_info_hold_type_id": "ID типа зацепки"
     },
     "footer": {
       "org": "Организация SetRsoft",

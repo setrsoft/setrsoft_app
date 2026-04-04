@@ -34,7 +34,17 @@
       "tutorial_rotate": "Left click — Rotate",
       "tutorial_pan": "Right click / Ctrl+click — Pan",
       "tutorial_zoom": "Scroll — Zoom",
-      "tutorial_center": "Double-click — Center"
+      "tutorial_center": "Double-click — Center",
+      "hold_info_title": "Griff-Informationen",
+      "hold_info_close": "Schließen",
+      "hold_info_name": "Name",
+      "hold_info_manufacturer": "Hersteller",
+      "hold_info_usage_type": "Verwendungstyp",
+      "hold_info_stock": "Verwendet / verfügbar (Bestand)",
+      "hold_info_color": "Bestandsfarbe",
+      "hold_info_instance_id": "Instanz-ID",
+      "hold_info_hold_id": "Griff-ID",
+      "hold_info_hold_type_id": "Grifftyp-ID"
     },
     "footer": {
       "org": "SetRsoft Organisation",

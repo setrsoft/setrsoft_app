@@ -34,7 +34,17 @@
       "tutorial_rotate": "Clic gauche — Rotation",
       "tutorial_pan": "Clic droit / Ctrl+clic — Déplacer",
       "tutorial_zoom": "Molette — Zoom",
-      "tutorial_center": "Double-clic — Centrer"
+      "tutorial_center": "Double-clic — Centrer",
+      "hold_info_title": "Informations sur la prise",
+      "hold_info_close": "Fermer",
+      "hold_info_name": "Nom",
+      "hold_info_manufacturer": "Fabricant",
+      "hold_info_usage_type": "Type d'usage",
+      "hold_info_stock": "Utilisées / disponibles (stock)",
+      "hold_info_color": "Couleur (stock)",
+      "hold_info_instance_id": "ID d'instance",
+      "hold_info_hold_id": "ID prise",
+      "hold_info_hold_type_id": "ID type de prise"
     },
     "footer": {
       "org": "Organisation SetRsoft",

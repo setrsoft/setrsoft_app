@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useGLTF } from "@react-three/drei";
 import { posthog } from "@/shared/analytics/posthog";
+import HoldInfoModal from "./HoldInfoModal";
 
 type HoldModel = {
   name: string;
@@ -38,6 +39,7 @@ const SidebarHoldsSection = forwardRef<
   const [showHolds, setShowHolds] = useState(true);
   const [showVolumes, setShowVolumes] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [infoHold, setInfoHold] = useState<HoldModel | null>(null);
 
   useEffect(() => {
     setModels((prevModels) => {
@@ -138,9 +140,11 @@ const SidebarHoldsSection = forwardRef<
   const HoldItem = ({
     hold,
     stockData,
+    onOpenInfo,
   }: {
     hold: HoldModel;
     stockData: any;
+    onOpenInfo: (hold: HoldModel) => void;
   }) => {
     if (!hold || !hold.hold_type) return null;
 
@@ -177,7 +181,8 @@ const SidebarHoldsSection = forwardRef<
             {used}/{available}
           </span>
           <button
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 p-1 text-on-surface-variant hover:text-red-400 bg-surface-high rounded transition-all"
+            type="button"
+            className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 p-1 text-on-surface-variant hover:text-red-400 bg-surface-high rounded transition-all"
             title="Delete hold"
             onClick={(e) => {
               e.stopPropagation();
@@ -190,6 +195,31 @@ const SidebarHoldsSection = forwardRef<
                 strokeLinejoin="round"
                 strokeWidth={2}
                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="absolute top-2 left-8 opacity-0 group-hover:opacity-100 p-1 text-on-surface-variant hover:text-mint bg-surface-high rounded transition-all"
+            title={t("editor.hold_info_title")}
+            aria-label={t("editor.hold_info_title")}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenInfo(hold);
+            }}
+          >
+            <svg
+              className="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden={true}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
           </button>
@@ -240,7 +270,12 @@ const SidebarHoldsSection = forwardRef<
         {showHolds && (
           <div className="overflow-x-hidden grid grid-cols-2 gap-2 overflow-y-auto">
             {holds.map((hold) => (
-              <HoldItem key={hold.hold_instance_id} hold={hold} stockData={stockData} />
+              <HoldItem
+                key={hold.hold_instance_id}
+                hold={hold}
+                stockData={stockData}
+                onOpenInfo={setInfoHold}
+              />
             ))}
           </div>
         )}
@@ -259,11 +294,22 @@ const SidebarHoldsSection = forwardRef<
         {showVolumes && (
           <div className="overflow-x-hidden grid grid-cols-2 gap-2 overflow-y-auto">
             {volumes.map((hold) => (
-              <HoldItem key={hold.hold_instance_id} hold={hold} stockData={stockData} />
+              <HoldItem
+                key={hold.hold_instance_id}
+                hold={hold}
+                stockData={stockData}
+                onOpenInfo={setInfoHold}
+              />
             ))}
           </div>
         )}
       </div>
+      <HoldInfoModal
+        isOpen={infoHold !== null}
+        hold={infoHold}
+        stockData={stockData}
+        onClose={() => setInfoHold(null)}
+      />
     </section>
     </HoldScrollContext.Provider>
   );
