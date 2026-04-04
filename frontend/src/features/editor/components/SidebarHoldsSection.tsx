@@ -268,7 +268,7 @@ const SidebarHoldsSection = forwardRef<
           </button>
         </div>
         {showHolds && (
-          <div className="overflow-x-hidden grid grid-cols-2 gap-2 overflow-y-auto">
+          <div className="overflow-x-hidden grid grid-cols-2 gap-2">
             {holds.map((hold) => (
               <HoldItem
                 key={hold.hold_instance_id}
@@ -292,7 +292,7 @@ const SidebarHoldsSection = forwardRef<
           </button>
         </div>
         {showVolumes && (
-          <div className="overflow-x-hidden grid grid-cols-2 gap-2 overflow-y-auto">
+          <div className="overflow-x-hidden grid grid-cols-2 gap-2">
             {volumes.map((hold) => (
               <HoldItem
                 key={hold.hold_instance_id}

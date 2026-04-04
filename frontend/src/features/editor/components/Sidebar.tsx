@@ -73,7 +73,7 @@ const Sidebar = ({
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-none">
+      <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto">
         <div className="px-4 py-4 space-y-6">
           <SidebarHoldsSection
             holdModels={processedHoldModels}
