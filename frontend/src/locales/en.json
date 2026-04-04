@@ -9,8 +9,8 @@
     "hero": {
       "subtitle": "We bring technology to serve the climbing industry",
       "test_editor": "Test the editor",
-      "holds_database": "Public climbing holds database",
-      "stock_management": "Routesetting stock management"
+      "holds_database": "Holds database",
+      "stock_management": "Holds stock manager"
     },
     "split": {
       "dev_title": "Join the project and contribute",
