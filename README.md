@@ -24,7 +24,7 @@ Feel free to create new Github Issues for new features or signal bugs.
 
 Clone the repo and run
 ```bash
-// The first run can take some time
+# The first run can take some time
 docker compose up
 ```
 
