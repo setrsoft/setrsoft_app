@@ -23,7 +23,7 @@ We are building a global database of climbing holds. You can:
 ### 3. Documentation & Translation
 - Improve this guide or the technical documentation.
 - Translate the interface into other languages to make the tool universal.
-- Help us manage the comunity and global project organisation and developpment .
+- Help us manage the community and global project organisation and development.
 
 
 
