@@ -1,2 +1,2 @@
 ## Context
-See .context/claude.md and other files in .context/ for project documentation and architecture notes.
+See .ai/CLAUDE.md and other files in .ai/ for project documentation and architecture notes.
