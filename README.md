@@ -15,7 +15,7 @@
 
 ## Welcome
 
-SetRsoft is a OpenSource comunity driven software. Test it live on the website http://www.setrsoft.com/ 
+SetRsoft is an open source community driven software. Test it live on the website http://www.setrsoft.com/ 
 
 Feel free to create new Github Issues for new features or signal bugs. 
 
