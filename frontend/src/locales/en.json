@@ -45,7 +45,8 @@
       "hold_info_instance_id": "Instance ID",
       "hold_info_hold_id": "Hold ID",
       "hold_info_hold_type_id": "Hold type ID",
-      "inspector_title": "Hold Inspector"
+      "inspector_title": "Hold Inspector",
+      "delete_hold": "Delete hold"
     },
     "footer": {
       "org": "SetRsoft organisation",
