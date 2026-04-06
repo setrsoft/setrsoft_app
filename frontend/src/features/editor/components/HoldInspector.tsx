@@ -95,7 +95,7 @@ const HoldInspector = () => {
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-mint"></div>
             <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-widest">
-              {t("Inspecteur des retenues")}
+              {t('editor.inspector_title')}
             </h3>
           </div>
           <button

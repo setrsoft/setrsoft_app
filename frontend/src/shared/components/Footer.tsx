@@ -10,7 +10,7 @@ export function Footer() {
           <div>
             <h3 className="text-white font-bold tracking-tight mb-4">{t('footer.org')}</h3>
             <p className="text-sm text-on-surface-variant">
-              The Open Source ecosystem for indoor climbing tech.
+              {t('footer.sentence')}
             </p>
           </div>
           <div>
@@ -25,18 +25,16 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-on-surface-variant">
               <li><a href="#" className="hover:text-mint transition-colors">{t('footer.partners')}</a></li>
               <li><a href="#" className="hover:text-mint transition-colors">{t('footer.contact')}</a></li>
-              <li>
-                <div className="flex gap-4 mt-6">
-                  <a href="#" className="hover:text-mint transition-colors font-medium">LinkedIn</a>
-                  <a href="#" className="hover:text-mint transition-colors font-medium">Facebook</a>
-                  <a href="#" className="hover:text-mint transition-colors font-medium">Instagram</a>
-                </div>
-              </li>
             </ul>
           </div>
         </div>
         <div className="border-t border-ghost-border/30 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-on-surface-variant">
           <p>{t('footer.rights')}</p>
+          <div className="flex gap-4 mt-4 md:mt-0">
+            <a href="#" className="hover:text-mint transition-colors font-medium">LinkedIn</a>
+            <a href="#" className="hover:text-mint transition-colors font-medium">Facebook</a>
+            <a href="#" className="hover:text-mint transition-colors font-medium">Instagram</a>
+          </div>
         </div>
       </div>
     </footer>

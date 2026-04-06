@@ -7,14 +7,14 @@
       "language": "Language"
     },
     "hero": {
-      "subtitle": "We bring technology to serve the climbing industry",
-      "test_editor": "Test the editor",
-      "holds_database": "Holds database",
-      "stock_management": "Holds stock manager"
+      "subtitle": "We bring technology to empower the climbing industry",
+      "test_editor": "Test 3D editor",
+      "holds_database": "Holds Database",
+      "stock_management": "Holds Stock Manager"
     },
     "split": {
       "dev_title": "Join the project and contribute",
-      "dev_desc": "Open source ecosystem for indoor climbing tech.",
+      "dev_desc": "Open source software for indoor climbing industry.",
       "dev_btn": "View on GitHub",
       "setter_title": "Routesetters",
       "setter_desc": "Test the software and shape the future of routesetting.",
@@ -44,10 +44,12 @@
       "hold_info_color": "Stock color",
       "hold_info_instance_id": "Instance ID",
       "hold_info_hold_id": "Hold ID",
-      "hold_info_hold_type_id": "Hold type ID"
+      "hold_info_hold_type_id": "Hold type ID",
+      "inspector_title": "Hold Inspector"
     },
     "footer": {
       "org": "SetRsoft organisation",
+      "sentence": "The Open Source software for indoor climbing industry.",
       "docs": "Documentation",
       "about": "About Us",
       "partners": "Partners",
