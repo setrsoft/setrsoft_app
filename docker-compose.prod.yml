@@ -27,17 +27,20 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    expose:
+      - "${PORT_BACKEND:-8000}"
     env_file:
       - .env
     environment:
       POSTGRES_HOST: db
-      POSTGRES_PORT: "5432"
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
       POSTGRES_DB: ${POSTGRES_DB:-setrsoft}
       POSTGRES_USER: ${POSTGRES_USER:-setrsoft}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env or the environment}
       SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env or the environment}
       DEBUG: ${DEBUG:-False}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:?Set ALLOWED_HOSTS in .env}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://${SERVER_IP}}
       TRUST_PROXY: ${TRUST_PROXY:-1}
     depends_on:
       db:
@@ -48,10 +51,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE: ${VITE_API_BASE:-}
-        VITE_POSTHOG_KEY: ${VITE_POSTHOG_KEY:-}
+        - VITE_API_BASE=/api
+        - VITE_PUBLIC_POSTHOG_PROJECT_TOKEN=${VITE_PUBLIC_POSTHOG_PROJECT_TOKEN:-}
+        - VITE_PUBLIC_POSTHOG_HOST=${VITE_PUBLIC_POSTHOG_HOST:-}
     ports:
-      - "80:80"
+      - "${PORT_FRONTEND:-80}:80"
     depends_on:
       - backend
 
