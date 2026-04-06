@@ -22,6 +22,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - setrsoft_network
 
   backend:
     build:
@@ -45,6 +47,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - setrsoft_network
 
   web:
     build:
@@ -54,10 +58,19 @@ services:
         - VITE_API_BASE=/api
         - VITE_PUBLIC_POSTHOG_PROJECT_TOKEN=${VITE_PUBLIC_POSTHOG_PROJECT_TOKEN:-}
         - VITE_PUBLIC_POSTHOG_HOST=${VITE_PUBLIC_POSTHOG_HOST:-}
-    ports:
-      - "${PORT_FRONTEND:-80}:80"
+    container_name: setrsoft-frontend
     depends_on:
       - backend
+    networks:
+      - setrsoft_network
+      - proxy-tier
 
 volumes:
   postgres_data_prod:
+
+networks:
+  setrsoft_network:
+    driver: bridge
+  proxy-tier:
+    external: true
+    name: ${DOCKER_NETWORK_NAME:-proxy-tier}
