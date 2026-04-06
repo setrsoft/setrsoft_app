@@ -148,7 +148,7 @@ const HoldInspector = () => {
           <button
             className="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
             onClick={() => {
-              posthog.capture({ distinctId: 'demo', event: 'hold removed', properties: { hold_name: selected.name, hold_id: selected.id } });
+              posthog.capture('hold removed', { hold_name: selected.name, hold_id: selected.id });
               removeObject(selected.id);
             }}
           >
@@ -213,7 +213,7 @@ const HoldInspector = () => {
                       className="p-1.5 text-on-surface-variant hover:text-red-400 hover:bg-surface-high rounded transition-colors"
                       title="Delete child hold"
                       onClick={() => {
-                        posthog.capture({ distinctId: 'demo', event: 'hold removed', properties: { hold_name: child.name, hold_id: child.id, is_child: true } });
+                        posthog.capture('hold removed', { hold_name: child.name, hold_id: child.id, is_child: true });
                         removeObject(child.id);
                       }}
                     >
