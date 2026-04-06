@@ -51,9 +51,11 @@ services:
     container_name: setrsoft-frontend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.setrsoft-app.rule=Host(`${SERVER_IP}`)"
-      - "traefik.http.routers.setrsoft-app.entrypoints=web"
-      - "traefik.http.services.setrsoft-app.loadbalancer.server.port=80"
+      - "traefik.http.routers.setrsoft-web.rule=Host(`${SERVER_IP}`)"
+      - "traefik.http.routers.setrsoft-web.entrypoints=web"
+      - "traefik.http.routers.setrsoft-web.service=setrsoft-web-service"
+      - "traefik.http.services.setrsoft-web-service.loadbalancer.server.port=80"
+      - "traefik.http.routers.setrsoft-web.priority=100"
     depends_on:
       - backend
     networks:
@@ -68,4 +70,4 @@ networks:
     driver: bridge
   public_gateway:
     external: true
-    name: ${DOCKER_NETWORK_NAME:-proxy-tier}
+    name: ${DOCKER_NETWORK_NAME:-default}
