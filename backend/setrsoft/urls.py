@@ -11,7 +11,7 @@ from django.urls import include, path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('gym/', include('gym.urls')),
+    path('api/gym/', include('gym.urls')),
 ]
 
 if settings.DEBUG:
