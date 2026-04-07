@@ -34,6 +34,10 @@ services:
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:?Set ALLOWED_HOSTS}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://${SERVER_IP}}
       TRUST_PROXY: ${TRUST_PROXY:-1}
+    command:
+      - "sh"
+      - "-c"
+      - "python manage.py migrate && python manage.py sync_holds --if-empty && gunicorn setrsoft.wsgi:application --bind 0.0.0.0:${PORT_BACKEND:-8000} --workers 2"
     depends_on:
       db:
         condition: service_healthy
