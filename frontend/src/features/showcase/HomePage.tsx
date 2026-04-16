@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { ROUTES } from '@/core/config';
 import { posthog } from '@/shared/analytics/posthog';
 import demoVideo from '@/assets/demo-CISe8V-c.mp4';
@@ -38,6 +39,21 @@ export function HomePage() {
   }, []);
 
   return (
+    <>
+    <Helmet>
+      <title>SetRsoft – Éditeur 3D Bouldering en ligne</title>
+      <meta name="description" content="Éditeur 3D virtuel pour créer vos blocs d'escalade bouldering. Simulation, routesetting, partage de séquences." />
+      <script type="application/ld+json">{JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "SetRsoft",
+        "applicationCategory": "SportsApplication",
+        "operatingSystem": "Web",
+        "description": "Éditeur 3D de blocs d'escalade bouldering en ligne. Routesetting virtuel.",
+        "url": "https://setrsoft.com",
+        "offers": { "@type": "Offer", "price": "0" }
+      })}</script>
+    </Helmet>
     <div className="flex flex-col gap-24 py-12 md:py-20 animate-fade-in">
       
       {/* Hero Section */}
@@ -60,7 +76,7 @@ export function HomePage() {
           
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
             <a
-              href="https://setrsoft.github.io/holds-dataset-hub/"
+              href="https://dataset.setrsoft.com/"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-surface-high text-white font-medium px-6 py-2.5 rounded-sm hover:bg-surface-lowest transition-colors border border-transparent hover:border-ghost-border/50 text-sm"
@@ -174,5 +190,6 @@ export function HomePage() {
       </section>
 
     </div>
+    </>
   );
 }

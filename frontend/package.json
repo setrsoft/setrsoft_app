@@ -18,6 +18,7 @@
     "posthog-js": "^1.364.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-helmet-async": "^2.0.1",
     "react-i18next": "^16.6.0",
     "react-router-dom": "^7.13.1",
     "three": "^0.177.0",

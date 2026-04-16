@@ -70,7 +70,7 @@ function EditorApp() {
         posthog.capture('editor session opened', { wall_id: wallId, session_id: session_data.id });
       }
     }
-  }, [session_data?.id, wallModels.length, handleLoad]);
+  }, [session_data?.id, wallId, wallModels.length, handleLoad]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -152,7 +152,7 @@ function EditorApp() {
               ))}
             </div>
           </div>
-          
+
           <MainCanvas wallModels={wallModels} />
           <HoldInspector />
           <Tutorial />
