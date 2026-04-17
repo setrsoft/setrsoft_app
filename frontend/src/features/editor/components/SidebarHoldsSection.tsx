@@ -61,7 +61,7 @@ const SidebarHoldsSection = forwardRef<
   const { t } = useTranslation();
   const { user, authenticatedFetch } = useEditorAuth();
   const API_URL = import.meta.env.VITE_API_BASE;
-  const [_currentDownloadUrl, setCurrentDownloadUrl] = useState<string>();
+  const [, setCurrentDownloadUrl] = useState<string>();
 
   const { data: stockData } = useQuery({
     queryKey: ["stocks", user?.related_gym_id],

@@ -111,7 +111,7 @@ function DragPreview() {
           const match = model.url.match(/\/([^\/]+)\.[^.]+$/);
           holdName = match ? match[1] : model.url;
         }
-        let newId = model.id || uuidv4();
+        const newId = model.id || uuidv4();
         addObject({
           id: newId,
           type: model.type,
