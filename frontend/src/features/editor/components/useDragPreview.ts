@@ -9,7 +9,7 @@ function calculateHoldRotation(
   upVector: "X" | "Y" | "Z" = "Y"
 ): [number, number, number] {
   try {
-    let faceNormal = normal.clone();
+    const faceNormal = normal.clone();
     faceNormal.transformDirection(surface.matrixWorld);
     faceNormal.normalize();
     if (Math.abs(faceNormal.y) > 0.99) {
@@ -53,7 +53,7 @@ function calculateHoldRotation(
     const finalRotation = new THREE.Euler();
     finalRotation.setFromRotationMatrix(finalRotationMatrix);
     return [finalRotation.x, finalRotation.y, finalRotation.z];
-  } catch (error) {
+  } catch {
     return [-Math.PI / 2, 0, 0];
   }
 }
@@ -160,7 +160,7 @@ export function useDragPreview({
       const q = computeAlignedQuaternion(normal, hit.object);
       setAlignedQuat([q.x, q.y, q.z, q.w]);
       // Compose with customRotation if present
-      let finalQ = q.clone();
+      const finalQ = q.clone();
       let customAngle = 0;
       if (model && typeof (model as any).customRotation === "number") {
         customAngle = (model as any).customRotation;
