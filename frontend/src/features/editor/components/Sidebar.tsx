@@ -36,8 +36,10 @@ const Sidebar = ({
   }>(null);
 
   const [addHoldModalOpen, setAddHoldModalOpen] = useState(false);
+  const [locallyAddedHolds, setLocallyAddedHolds] = useState<HoldModel[]>([]);
 
   const handleHoldAddedFromModal = (newHold: HoldModel) => {
+    setLocallyAddedHolds((prev) => [...prev, newHold]);
     if (holdsSectionRef.current) {
       holdsSectionRef.current.addHold(newHold);
     }
@@ -58,9 +60,7 @@ const Sidebar = ({
           onClose={() => setAddHoldModalOpen(false)}
           session_data={session_data}
           onHoldAdded={handleHoldAddedFromModal}
-          currentHolds={
-            holdsSectionRef.current?.getCurrentHolds() || processedHoldModels
-          }
+          currentHolds={[...processedHoldModels, ...locallyAddedHolds]}
         />
 
         <div className="flex gap-2 mt-4">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -84,23 +84,25 @@ function EditorApp() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges, t]);
 
-  const holdModels: Array<Record<string, HoldInstance>> = [];
-  const holdModelsGLBURL: string[] = [];
-
   useEffect(() => {
     const glbUrl = session_data?.related_wall?.glb_url;
     setWallModels(glbUrl ? [glbUrl] : []);
   }, [session_data?.related_wall?.glb_url]);
 
-  if (session_data?.related_holds_collection) {
-    session_data.holds_collection_instances?.forEach((hold: any) => {
-      hold.hold_instance_id = hold.id;
-      holdModels.push(hold);
-      if (hold.hold_type?.glb_url) {
-        holdModelsGLBURL.push(hold.hold_type.glb_url);
-      }
-    });
-  }
+  const { holdModels, holdModelsGLBURL } = useMemo(() => {
+    const holdModels: Array<Record<string, HoldInstance>> = [];
+    const holdModelsGLBURL: string[] = [];
+    if (session_data?.related_holds_collection) {
+      session_data.holds_collection_instances?.forEach((hold: any) => {
+        hold.hold_instance_id = hold.id;
+        holdModels.push(hold);
+        if (hold.hold_type?.glb_url) {
+          holdModelsGLBURL.push(hold.hold_type.glb_url);
+        }
+      });
+    }
+    return { holdModels, holdModelsGLBURL };
+  }, [session_data?.related_holds_collection, session_data?.holds_collection_instances]);
 
   const { preload } = useGLTF;
   useEffect(() => {

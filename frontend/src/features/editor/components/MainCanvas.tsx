@@ -158,6 +158,10 @@ function DragPreview() {
     wallColors,
     holdColors,
     coloredTexture,
+    addObject,
+    endDrag,
+    selectObject,
+    selectedObjId,
   ]);
 
   if (!dragging || !model || !model.url) return null;
@@ -223,7 +227,7 @@ function PlacedObjects({
 
   useEffect(() => {
     if (onHoldDragState) onHoldDragState(!!selectedHold);
-  }, [selectedHold]);
+  }, [selectedHold, onHoldDragState]);
 
   // Use unified drag preview logic
   const { pos: previewPos, quat: previewQuat } = useDragPreview({
