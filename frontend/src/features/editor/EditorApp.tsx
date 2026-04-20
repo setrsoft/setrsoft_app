@@ -6,6 +6,7 @@ import { posthog } from "@/shared/analytics/posthog";
 
 import useWallSessionQuery from "./utils/WallSessionQuery";
 import { usePlacementStore } from "./store";
+import type { SessionHoldInstance } from "./store";
 import { useHandleLoadSession } from "./utils/HandleLoadSession";
 
 import MainCanvas from "./components/MainCanvas";
@@ -14,15 +15,6 @@ import HoldInspector from "./components/HoldInspector";
 import FileManager from "./components/FileManager";
 import { useTranslation } from "react-i18next";
 import Tutorial from "./components/Tutorial";
-
-interface HoldInstance {
-  id: string;
-  hold_instance_id?: string;
-  hold_type?: {
-    glb_url?: string;
-  };
-  [key: string]: unknown;
-}
 
 const transformTools = [
   { id: "translate", icon: "open_with", label: "Translate", hint: "Shift + Left click" },
@@ -90,10 +82,10 @@ function EditorApp() {
   }, [session_data?.related_wall?.glb_url]);
 
   const { holdModels, holdModelsGLBURL } = useMemo(() => {
-    const holdModels: Array<Record<string, HoldInstance>> = [];
+    const holdModels: SessionHoldInstance[] = [];
     const holdModelsGLBURL: string[] = [];
     if (session_data?.related_holds_collection) {
-      session_data.holds_collection_instances?.forEach((hold: any) => {
+      session_data.holds_collection_instances?.forEach((hold: SessionHoldInstance) => {
         hold.hold_instance_id = hold.id;
         holdModels.push(hold);
         if (hold.hold_type?.glb_url) {

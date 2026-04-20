@@ -1,11 +1,24 @@
 import { useEditorAuth } from "../mocks/useEditorAuth";
 
+type SessionDataWithLayout = {
+  id?: string | number;
+  layout?: string | { objects?: Array<{ type?: string; url?: string; [key: string]: unknown }> };
+  [key: string]: unknown;
+};
+
+type StockHold = {
+  id?: string | number;
+  hold_type?: { id?: string | number; model?: string; manufacturer_ref?: string; cdn_ref?: string; manufacturer?: string | { name?: string } };
+  available_count?: number;
+  last_used_wall?: { wall_name?: string; session_name?: string; wall_id?: string | number; session_id?: string | number };
+};
+
 export function useHoldAvailabilityValidation() {
   const { authenticatedFetch, user } = useEditorAuth();
   const API_URL = import.meta.env.VITE_API_BASE;
   const gym_id = user?.related_gym_id;
 
-  const validateHoldAvailability = async (sessionData: any) => {
+  const validateHoldAvailability = async (sessionData: SessionDataWithLayout) => {
     try {
       const stockResponse = await authenticatedFetch(
         `${API_URL}/gym/stock-explore/${gym_id}/?page_size=1000`
@@ -33,7 +46,7 @@ export function useHoldAvailabilityValidation() {
       }
 
       const requiredHolds: Record<number, number> = {};
-      layout.objects.forEach((obj: any) => {
+      layout.objects.forEach((obj) => {
         if (obj.type === "hold") {
           const holdTypeId = extractHoldTypeIdFromUrl(obj.url);
           if (holdTypeId) {

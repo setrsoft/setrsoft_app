@@ -101,13 +101,17 @@ const ModelViewerInner = ({
           let texture: THREE.Texture | null = null;
           if (Array.isArray(child.material)) {
             for (const mat of child.material) {
-              if ((mat as any).map) {
-                texture = (mat as any).map;
+              const stdMat = mat as THREE.MeshStandardMaterial;
+              if (stdMat.map) {
+                texture = stdMat.map;
                 break;
               }
             }
-          } else if ((child.material as any).map) {
-            texture = (child.material as any).map;
+          } else {
+            const stdMat = child.material as THREE.MeshStandardMaterial;
+            if (stdMat.map) {
+              texture = stdMat.map;
+            }
           }
           
           if (texture) {

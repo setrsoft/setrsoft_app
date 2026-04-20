@@ -162,8 +162,8 @@ export function useDragPreview({
       // Compose with customRotation if present
       const finalQ = q.clone();
       let customAngle = 0;
-      if (model && typeof (model as any).customRotation === "number") {
-        customAngle = (model as any).customRotation;
+      if (model && 'customRotation' in model && typeof model.customRotation === "number") {
+        customAngle = model.customRotation;
       }
       if (customAngle) {
         const customQ = new THREE.Quaternion();
@@ -174,7 +174,7 @@ export function useDragPreview({
       // Determine drop target type
       let foundHoldId: string | undefined = undefined;
       let foundWall = false;
-      let o: any = hit.object;
+      let o: THREE.Object3D | null = hit.object;
       while (o) {
         if (o.userData && o.userData.placedObjectId) {
           foundHoldId = o.userData.placedObjectId;

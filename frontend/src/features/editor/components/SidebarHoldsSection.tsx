@@ -7,6 +7,7 @@ import {
   useCallback,
 } from "react";
 import { useDragStore, usePlacementStore } from "../store";
+import type { HoldModel, SessionData } from "../store";
 import Hold360, { HoldScrollContext } from "../stubs/Hold360";
 import React from "react";
 import { useEditorAuth } from "../mocks/useEditorAuth";
@@ -15,14 +16,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useGLTF } from "@react-three/drei";
 import { posthog } from "@/shared/analytics/posthog";
 import HoldInfoModal from "./HoldInfoModal";
-
-type HoldModel = {
-  name: string;
-  file: string;
-  hold_type: Record<string, any>;
-  hold_instance_id: string;
-  id?: string;
-};
 
 interface SidebarHoldsSectionRef {
   addHold: (hold: HoldModel) => void;
@@ -33,7 +26,7 @@ const SidebarHoldsSection = forwardRef<
   SidebarHoldsSectionRef,
   {
     holdModels: HoldModel[];
-    session_data: any;
+    session_data: SessionData;
   }
 >(({ holdModels, session_data }, ref) => {
   const [locallyAddedHolds, setLocallyAddedHolds] = useState<HoldModel[]>([]);
@@ -126,7 +119,7 @@ const SidebarHoldsSection = forwardRef<
       e.preventDefault();
       startDrag({
         type: "hold",
-        url: model.hold_type.glb_url,
+        url: (model.hold_type.glb_url as string | undefined) ?? '',
         customRotation: 0,
       });
       const end = () => {
@@ -144,13 +137,13 @@ const SidebarHoldsSection = forwardRef<
     onOpenInfo,
   }: {
     hold: HoldModel;
-    stockData: any;
+    stockData: { holds?: Array<{ id: string | number; available_count?: number; used_count?: number; color?: string }> } | undefined;
     onOpenInfo: (hold: HoldModel) => void;
   }) => {
     if (!hold || !hold.hold_type) return null;
 
     const currentHoldData = stockData?.holds?.find(
-      (stock: any) => stock.id === hold.id
+      (stock) => stock.id === hold.id
     );
     const available = currentHoldData?.available_count || 0;
     const used = currentHoldData?.used_count || 0;

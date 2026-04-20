@@ -68,8 +68,8 @@ function DragPreview() {
     const handleDrop = () => {
       if (model && pos && quat && alignedQuat) {
         let customRotation = 0;
-        if (typeof (model as any).customRotation === "number") {
-          customRotation = (model as any).customRotation;
+        if (typeof model.customRotation === "number") {
+          customRotation = model.customRotation;
         } else if (model.type === "hold") {
           customRotation = 0;
         }

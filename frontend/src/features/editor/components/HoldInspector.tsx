@@ -17,8 +17,8 @@ function RotationHandle({
   const handleY = radius + handleRadius * Math.sin(rotation - Math.PI / 2);
   const onPointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
-    window.addEventListener("pointermove", onPointerMove as any);
-    window.addEventListener("pointerup", onPointerUp as any);
+    window.addEventListener("pointermove", onPointerMove as EventListener);
+    window.addEventListener("pointerup", onPointerUp as EventListener);
   };
   const onPointerMove = (e: PointerEvent) => {
     if (!circleRef.current) return;
@@ -29,8 +29,8 @@ function RotationHandle({
     onRotate(angle);
   };
   const onPointerUp = () => {
-    window.removeEventListener("pointermove", onPointerMove as any);
-    window.removeEventListener("pointerup", onPointerUp as any);
+    window.removeEventListener("pointermove", onPointerMove as EventListener);
+    window.removeEventListener("pointerup", onPointerUp as EventListener);
   };
   return (
     <div
