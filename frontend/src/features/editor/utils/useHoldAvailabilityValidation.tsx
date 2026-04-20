@@ -29,7 +29,7 @@ export function useHoldAvailabilityValidation() {
       }
 
       const stockData = await stockResponse.json();
-      const stockHolds = stockData.holds || [];
+      const stockHolds: StockHold[] = stockData.holds || [];
 
       let layout = sessionData.layout;
       if (typeof layout === "string") {
@@ -61,7 +61,7 @@ export function useHoldAvailabilityValidation() {
 
       const unavailableHolds = [];
       for (const [holdTypeId, requiredCount] of Object.entries(requiredHolds)) {
-        const stockHold = stockHolds.find((h: any) => h.hold_type?.id == holdTypeId);
+        const stockHold = stockHolds.find((h) => h.hold_type?.id == holdTypeId);
         if (!stockHold) {
           unavailableHolds.push({
             hold_type_id: holdTypeId,
@@ -81,10 +81,11 @@ export function useHoldAvailabilityValidation() {
                 stockHold.hold_type?.manufacturer_ref ||
                 stockHold.hold_type?.cdn_ref ||
                 `Hold Type ${holdTypeId}`,
-              manufacturer:
-                stockHold.hold_type?.manufacturer?.name ||
-                stockHold.hold_type?.manufacturer ||
-                "Unknown",
+              manufacturer: (() => {
+                const mfr = stockHold.hold_type?.manufacturer;
+                if (typeof mfr === 'object' && mfr !== null) return mfr.name ?? "Unknown";
+                return (mfr as string | undefined) ?? "Unknown";
+              })(),
               required_count: requiredCount,
               available_count: availableCount,
               current_location:
