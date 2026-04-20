@@ -110,7 +110,7 @@ export default function AddHoldModal({
     ? deduplicatedStockData.filter(
         (hold: StockItem) =>
           !currentHoldTypeIds.has(hold.hold_type.id) &&
-          !addedHoldIds.has(hold.hold_type.id as number)
+          !addedHoldIds.has(hold.hold_type.id)
       )
     : deduplicatedStockData;
 
