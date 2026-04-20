@@ -83,16 +83,17 @@ function EditorApp() {
 
   const { holdModels, holdModelsGLBURL } = useMemo(() => {
     const holdModels: SessionHoldInstance[] = [];
-    const holdModelsGLBURL: string[] = [];
+    const glbUrlSet = new Set<string>();
     if (session_data?.related_holds_collection) {
       session_data.holds_collection_instances?.forEach((hold: SessionHoldInstance) => {
         const holdWithId = { ...hold, hold_instance_id: hold.id };
         holdModels.push(holdWithId);
         if (holdWithId.hold_type?.glb_url) {
-          holdModelsGLBURL.push(holdWithId.hold_type.glb_url);
+          glbUrlSet.add(holdWithId.hold_type.glb_url);
         }
       });
     }
+    const holdModelsGLBURL = Array.from(glbUrlSet);
     return { holdModels, holdModelsGLBURL };
   }, [session_data?.related_holds_collection, session_data?.holds_collection_instances]);
 
