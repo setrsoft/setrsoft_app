@@ -1,46 +1,5 @@
 import { create } from "zustand";
 
-export interface HoldType {
-  id?: string | number;
-  cdn_ref?: string;
-  manufacturer_ref?: string;
-  manufacturer?: string | { name?: string; [key: string]: unknown };
-  model?: string;
-  glb_url?: string;
-  sprite_sheet_url?: string;
-  hold_usage_type?: string;
-  [key: string]: unknown;
-}
-
-export interface HoldModel {
-  name: string;
-  file: string;
-  hold_type: HoldType;
-  hold_instance_id: string;
-  id?: string;
-}
-
-export type SessionHoldInstance = {
-  id: string;
-  hold_instance_id?: string;
-  hold_type?: HoldType;
-  [key: string]: unknown;
-};
-
-export interface SessionData {
-  id?: string | number;
-  session_name?: string;
-  layout?: string | Record<string, unknown>;
-  related_wall?: {
-    id?: string | number;
-    glb_url?: string;
-    [key: string]: unknown;
-  };
-  related_holds_collection?: unknown;
-  holds_collection_instances?: SessionHoldInstance[];
-  [key: string]: unknown;
-}
-
 export type DragModel = {
   type: "wall" | "hold";
   url: string;

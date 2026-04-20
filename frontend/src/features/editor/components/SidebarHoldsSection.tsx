@@ -2,12 +2,10 @@ import {
   useState,
   forwardRef,
   useImperativeHandle,
+  useEffect,
   useRef,
-  useMemo,
-  useCallback,
 } from "react";
 import { useDragStore, usePlacementStore } from "../store";
-import type { HoldModel, SessionData } from "../store";
 import Hold360, { HoldScrollContext } from "../stubs/Hold360";
 import React from "react";
 import { useEditorAuth } from "../mocks/useEditorAuth";
@@ -16,6 +14,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useGLTF } from "@react-three/drei";
 import { posthog } from "@/shared/analytics/posthog";
 import HoldInfoModal from "./HoldInfoModal";
+
+type HoldModel = {
+  name: string;
+  file: string;
+  hold_type: Record<string, any>;
+  hold_instance_id: string;
+  id?: string;
+};
 
 interface SidebarHoldsSectionRef {
   addHold: (hold: HoldModel) => void;
@@ -26,26 +32,27 @@ const SidebarHoldsSection = forwardRef<
   SidebarHoldsSectionRef,
   {
     holdModels: HoldModel[];
-    session_data: SessionData;
+    session_data: any;
   }
 >(({ holdModels, session_data }, ref) => {
-  const [locallyAddedHolds, setLocallyAddedHolds] = useState<HoldModel[]>([]);
-  const [deletedHoldTypeIds, setDeletedHoldTypeIds] = useState<Set<string>>(new Set());
+  const [models, setModels] = useState(holdModels);
   const [showHolds, setShowHolds] = useState(true);
   const [showVolumes, setShowVolumes] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [infoHold, setInfoHold] = useState<HoldModel | null>(null);
 
-  const models = useMemo(() => {
-    const extraHolds = locallyAddedHolds.filter(
-      (local) => !holdModels.some(
-        (server) => server.hold_instance_id === local.hold_instance_id
-      )
-    );
-    return [...holdModels, ...extraHolds].filter(
-      (m) => !deletedHoldTypeIds.has(String(m.hold_type?.id))
-    );
-  }, [holdModels, locallyAddedHolds, deletedHoldTypeIds]);
+  useEffect(() => {
+    setModels((prevModels) => {
+      const locallyAddedHolds = prevModels.filter(
+        (prevModel) =>
+          !holdModels.some(
+            (holdModel) =>
+              holdModel.hold_instance_id === prevModel.hold_instance_id
+          )
+      );
+      return [...holdModels, ...locallyAddedHolds];
+    });
+  }, [holdModels]);
 
   const startDrag = useDragStore((s) => s.startDrag);
   const endDrag = useDragStore((s) => s.endDrag);
@@ -54,7 +61,7 @@ const SidebarHoldsSection = forwardRef<
   const { t } = useTranslation();
   const { user, authenticatedFetch } = useEditorAuth();
   const API_URL = import.meta.env.VITE_API_BASE;
-  const [, setCurrentDownloadUrl] = useState<string>();
+  const [_currentDownloadUrl, setCurrentDownloadUrl] = useState<string>();
 
   const { data: stockData } = useQuery({
     queryKey: ["stocks", user?.related_gym_id],
@@ -66,14 +73,14 @@ const SidebarHoldsSection = forwardRef<
     enabled: !!user && !!user?.related_gym_id,
   });
 
-  const addHoldToLocal = useCallback((newHold: HoldModel) => {
-    setLocallyAddedHolds((prev) => [...prev, newHold]);
+  const addHoldToLocal = (newHold: HoldModel) => {
+    setModels((prev) => [...prev, newHold]);
     if (newHold.hold_type?.glb_url) {
       useGLTF.preload(newHold.hold_type.glb_url);
     }
-  }, []);
+  };
 
-  const getCurrentHolds = useCallback(() => models, [models]);
+  const getCurrentHolds = () => models;
 
   useImperativeHandle(
     ref,
@@ -81,12 +88,11 @@ const SidebarHoldsSection = forwardRef<
       addHold: addHoldToLocal,
       getCurrentHolds,
     }),
-    [addHoldToLocal, getCurrentHolds]
+    [models]
   );
 
   const handleDelete = async (hold: HoldModel) => {
-    setDeletedHoldTypeIds((prev) => new Set([...prev, String(hold.hold_type?.id)]));
-    setLocallyAddedHolds((prev) => prev.filter((m) => m.hold_type?.id !== hold.hold_type?.id));
+    setModels(models.filter((m) => m.hold_type.id !== hold.hold_type.id));
     posthog.capture({
       distinctId: 'demo',
       event: 'hold removed from collection',
@@ -119,7 +125,7 @@ const SidebarHoldsSection = forwardRef<
       e.preventDefault();
       startDrag({
         type: "hold",
-        url: (model.hold_type.glb_url as string | undefined) ?? '',
+        url: model.hold_type.glb_url,
         customRotation: 0,
       });
       const end = () => {
@@ -137,13 +143,13 @@ const SidebarHoldsSection = forwardRef<
     onOpenInfo,
   }: {
     hold: HoldModel;
-    stockData: { holds?: Array<{ id: string | number; available_count?: number; used_count?: number; color?: string }> } | undefined;
+    stockData: any;
     onOpenInfo: (hold: HoldModel) => void;
   }) => {
     if (!hold || !hold.hold_type) return null;
 
     const currentHoldData = stockData?.holds?.find(
-      (stock) => stock.id === hold.id
+      (stock: any) => stock.id === hold.id
     );
     const available = currentHoldData?.available_count || 0;
     const used = currentHoldData?.used_count || 0;

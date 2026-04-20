@@ -1,22 +1,30 @@
-import type { HoldType, HoldModel } from "../store";
+interface HoldType {
+  id: string | number;
+  cdn_ref: string;
+  manufacturer_ref?: string;
+  manufacturer?: string;
+  model?: string;
+  glb_url?: string;       // provided by the serializer (HF CDN URL)
+  [key: string]: unknown;
+}
 
 interface SelectedHold {
-  id: string | number;
+  id: string;
   hold_type: HoldType;
 }
 
 export default async function HandleAddHold(
   selectedHold: SelectedHold,
   _session_data: unknown,
-  onHoldAdded: ((hold: HoldModel) => void) | undefined
+  onHoldAdded: ((hold: any) => void) | undefined
 ) {
   try {
-    const newHoldInstance: HoldModel = {
-      hold_instance_id: String(selectedHold.id),
-      id: String(selectedHold.id),
-      name: (selectedHold.hold_type.manufacturer_ref as string | undefined)
-        ?? `${(selectedHold.hold_type.manufacturer as string | undefined) ?? ''} ${selectedHold.hold_type.model ?? ''}`.trim(),
-      file: (selectedHold.hold_type.cdn_ref as string) ?? '',
+    const newHoldInstance = {
+      hold_instance_id: selectedHold.id,
+      id: selectedHold.id,
+      name: selectedHold.hold_type.manufacturer_ref
+        ?? `${selectedHold.hold_type.manufacturer ?? ''} ${selectedHold.hold_type.model ?? ''}`.trim(),
+      file: selectedHold.hold_type.cdn_ref,
       hold_type: {
         ...selectedHold.hold_type,
         // glb_url is already set by the serializer — no need to reconstruct it

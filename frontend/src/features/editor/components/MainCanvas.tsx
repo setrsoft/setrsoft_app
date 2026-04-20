@@ -2,6 +2,7 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Suspense } from "react";
 import { useDragStore, usePlacementStore } from "../store";
+import type { PlacedObject } from "../store";
 import ModelViewer from "./ModelViewer";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import * as THREE from "three";
@@ -68,8 +69,8 @@ function DragPreview() {
     const handleDrop = () => {
       if (model && pos && quat && alignedQuat) {
         let customRotation = 0;
-        if (typeof model.customRotation === "number") {
-          customRotation = model.customRotation;
+        if (typeof (model as any).customRotation === "number") {
+          customRotation = (model as any).customRotation;
         } else if (model.type === "hold") {
           customRotation = 0;
         }
@@ -84,7 +85,7 @@ function DragPreview() {
           const parentObj = objects.find((o) => o.id === parentId);
           if (parentObj) {
             // Combine base rotation and customRotation for parent
-            const parentQ = new THREE.Quaternion(...parentObj.rotation);
+            let parentQ = new THREE.Quaternion(...parentObj.rotation);
             if (typeof parentObj.customRotation === "number") {
               const customQ = new THREE.Quaternion();
               customQ.setFromAxisAngle(
@@ -111,7 +112,7 @@ function DragPreview() {
           const match = model.url.match(/\/([^\/]+)\.[^.]+$/);
           holdName = match ? match[1] : model.url;
         }
-        const newId = model.id || uuidv4();
+        let newId = model.id || uuidv4();
         addObject({
           id: newId,
           type: model.type,
@@ -158,10 +159,6 @@ function DragPreview() {
     wallColors,
     holdColors,
     coloredTexture,
-    addObject,
-    endDrag,
-    selectObject,
-    selectedObjId,
   ]);
 
   if (!dragging || !model || !model.url) return null;
@@ -207,27 +204,38 @@ function PlacedObjects({
   const dragging = useDragStore((s) => s.dragging);
   const { camera, scene, gl } = useThree();
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [draggedObj, setDraggedObj] = useState<PlacedObject | null>(null);
+  const [draggedChildren, setDraggedChildren] = useState<string[]>([]);
   // Ref to track which hold received pointer down
   const pointerDownHoldIdRef = React.useRef<string | null>(null);
 
-  const draggedObj = useMemo(
-    () => draggingId ? (objects.find((o) => o.id === draggingId) ?? null) : null,
-    [draggingId, objects]
-  );
-  const draggedChildren = useMemo(
-    () => draggedObj ? objects.filter((o) => o.parentId === draggedObj.id).map((o) => o.id) : [],
-    [draggedObj, objects]
-  );
-
   // Find if any hold is selected
-  const selectedHold = useMemo(() =>
+  const selectedHold = useMemo(() => 
     objects.find((o) => o.type === "hold" && o.id === selectedObjId),
     [objects, selectedObjId]
   );
 
   useEffect(() => {
     if (onHoldDragState) onHoldDragState(!!selectedHold);
-  }, [selectedHold, onHoldDragState]);
+  }, [selectedHold]);
+
+  // Set dragged object and its children on drag start
+  useEffect(() => {
+    if (draggingId) {
+      const obj = objects.find((o) => o.id === draggingId) || null;
+      setDraggedObj(obj);
+      // Store children ids if dragging a parent
+      if (obj) {
+        const children = objects
+          .filter((o) => o.parentId === obj.id)
+          .map((o) => o.id);
+        setDraggedChildren(children);
+      }
+    } else {
+      setDraggedObj(null);
+      setDraggedChildren([]);
+    }
+  }, [draggingId, objects]);
 
   // Use unified drag preview logic
   const { pos: previewPos, quat: previewQuat } = useDragPreview({
@@ -249,6 +257,7 @@ function PlacedObjects({
         });
       }
       setDraggingId(null);
+      setDraggedObj(null);
       document.body.style.cursor = "grab";
       window.removeEventListener("mouseup", handleUp);
       window.removeEventListener("touchend", handleUp);
@@ -274,15 +283,18 @@ function PlacedObjects({
           updateObject(childId, { parentId: newParent.id });
         });
       }
+      setDraggedChildren([]);
     }
   }, [dragging, draggedObj, draggedChildren, objects, updateObject]);
 
   // Helper: recursively render hold tree
   function renderHoldTree(parentId: string | null) {
     return objects
-      .filter((o) => o.type === "hold" && o.parentId === parentId && o.url)
+      .filter((o) => o.type === "hold" && o.parentId === parentId && o.url) // Only render objects with valid URLs
       .map((obj) => {
+        // Hide children during parent re-drag
         if (draggingId && draggingId === obj.id) return null;
+        // Compose rotation with customRotation if present
         let groupQuaternion = obj.rotation;
         if (typeof obj.customRotation === "number") {
           const baseQ = new THREE.Quaternion(...obj.rotation);
@@ -294,12 +306,13 @@ function PlacedObjects({
           baseQ.multiply(customQ);
           groupQuaternion = [baseQ.x, baseQ.y, baseQ.z, baseQ.w];
         }
+        // Timer-based click vs drag logic
         let dragTimer: number | null = null;
         let dragStarted = false;
         const handlePointerDown = (e: React.PointerEvent) => {
           e.stopPropagation();
           dragStarted = false;
-          pointerDownHoldIdRef.current = obj.id;
+          pointerDownHoldIdRef.current = obj.id; // Track pointer down hold
           dragTimer = window.setTimeout(() => {
             dragStarted = true;
             removeObject(obj.id);
@@ -320,6 +333,7 @@ function PlacedObjects({
             clearTimeout(dragTimer);
             dragTimer = null;
           }
+          // Only unselect if pointer down and up happened on the same hold
           if (!dragStarted && pointerDownHoldIdRef.current === obj.id) {
             if (selectedObjId === obj.id) {
               selectObject(null);
@@ -412,40 +426,48 @@ function PlacedObjects({
 }
 
 const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
+  const [isWallLoading, setIsWallLoading] = useState(true);
   const [wallLoadCount, setWallLoadCount] = useState(0);
-  const [wallBatchSize, setWallBatchSize] = useState(0);
-  const [forceLoaded, setForceLoaded] = useState(false);
 
+  // Add wall by default using the first element from wallModels
   const addObject = usePlacementStore((s) => s.addObject);
   const updateObject = usePlacementStore((s) => s.updateObject);
   const objects = usePlacementStore((s) => s.objects);
 
-  const wallObjects = useMemo(() =>
-    objects.filter((o) => o.type === "wall"),
+  // Count wall objects to track loading
+  const wallObjects = useMemo(() => 
+    objects.filter((o) => o.type === "wall"), 
     [objects]
   );
-
-  // Sync batch size with current wall count — React's recommended pattern for resetting
-  // state when derived data changes (avoids setState-in-effect anti-pattern).
-  if (wallBatchSize !== wallObjects.length) {
-    setWallBatchSize(wallObjects.length);
-    setWallLoadCount(0);
-    setForceLoaded(false);
-  }
-
-  const isWallLoading = !forceLoaded && wallObjects.length > 0 && wallLoadCount < wallObjects.length;
-
+  
+  useEffect(() => {
+    if (wallObjects.length > 0) {
+      setWallLoadCount(0); // Reset counter when walls change
+      setIsWallLoading(true);
+    }
+  }, [wallObjects.length]);
+  
   const handleWallLoadComplete = useCallback(() => {
     setWallLoadCount(prev => prev + 1);
   }, []);
-
-  // Fallback: if onLoadComplete never fires (e.g. model cached), stop loading after 1s
+  
+  useEffect(() => {
+    if (wallLoadCount >= wallObjects.length && wallObjects.length > 0) {
+      setIsWallLoading(false);
+    }
+  }, [wallLoadCount, wallObjects.length]);
+  
+  // If walls are loaded from session but haven't triggered load callbacks, mark as loaded after a delay
   useEffect(() => {
     if (wallObjects.length > 0 && isWallLoading) {
-      const timer = setTimeout(() => setForceLoaded(true), 1000);
+      const timer = setTimeout(() => {
+        setIsWallLoading(false);
+      }, 1000); // Give a short delay for walls that were loaded from session
       return () => clearTimeout(timer);
     }
   }, [wallObjects.length, isWallLoading]);
+  // Use a ref to track if we've already added a wall to avoid infinite loop
+  // Reset when wallModels change (new session)
   const wallAddedRef = useRef<string | null>(null);
   
   useEffect(() => {
@@ -491,11 +513,13 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
           console.log("[MainCanvas] Wall already exists, skipping add");
         }
         wallAddedRef.current = currentWallUrl;
+        setIsWallLoading(false);
       }
     } else {
       console.log("[MainCanvas] No wallModels, clearing wall");
-      // No wall available — clear ref
+      // No wall available — clear ref and stop loading overlay
       wallAddedRef.current = null;
+      setIsWallLoading(false);
     }
   }, [wallModels, addObject, updateObject, objects]);
 

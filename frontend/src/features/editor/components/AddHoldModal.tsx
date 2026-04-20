@@ -5,19 +5,19 @@ import HandleAddHold from "../utils/HandleAddHold";
 import { useEditorAuth } from "../mocks/useEditorAuth";
 import PaginationList from "../stubs/PaginationList";
 import { useTranslation } from "react-i18next";
-import type { HoldModel, SessionData } from "../store";
 
-type StockItem = {
-  id: string | number;
-  hold_type: { id: string | number; cdn_ref?: string; [key: string]: unknown };
-  model?: string;
-  [key: string]: unknown;
+type HoldModel = {
+  name: string;
+  file: string;
+  hold_type: Record<string, any>;
+  hold_instance_id: string;
+  id?: string;
 };
 
 interface AddHoldModalProps {
   isOpen: boolean;
   onClose: () => void;
-  session_data: SessionData;
+  session_data: any;
   onHoldAdded: (hold: HoldModel) => void;
   currentHolds: HoldModel[];
 }
@@ -32,7 +32,7 @@ export default function AddHoldModal({
   const [search, setSearch] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const scrollRef = useRef<HTMLElement>(null);
-  const [addedHoldIds, setAddedHoldIds] = useState<Set<string | number>>(new Set());
+  const [addedHoldIds, setAddedHoldIds] = useState<Set<number>>(new Set());
   const { user, authenticatedFetch } = useEditorAuth();
   const [page, setPage] = useState(1);
   const API_URL = import.meta.env.VITE_API_BASE;
@@ -97,7 +97,7 @@ export default function AddHoldModal({
   );
 
   const deduplicatedStockData = Array.isArray(rawStockData)
-    ? rawStockData.reduce((acc: StockItem[], current: StockItem) => {
+    ? rawStockData.reduce((acc: any[], current: any) => {
         const exists = acc.find(
           (hold) => hold.hold_type.id === current.hold_type.id
         );
@@ -108,25 +108,24 @@ export default function AddHoldModal({
 
   const stockData = Array.isArray(deduplicatedStockData)
     ? deduplicatedStockData.filter(
-        (hold: StockItem) =>
+        (hold: any) =>
           !currentHoldTypeIds.has(hold.hold_type.id) &&
-          !addedHoldIds.has(hold.hold_type.id as number)
+          !addedHoldIds.has(hold.hold_type.id)
       )
     : deduplicatedStockData;
 
   const filteredStockData = Array.isArray(stockData)
-    ? stockData.filter((hold: StockItem) => {
+    ? stockData.filter((hold: any) => {
         if (!search) return true;
         const searchLower = search.toLowerCase();
-        const manufacturerName = hold.hold_type?.manufacturer_name as string | undefined;
         return (
           hold.model?.toLowerCase().includes(searchLower) ||
-          manufacturerName?.toLowerCase().includes(searchLower)
+          hold.hold_type?.manufacturer_name?.toLowerCase().includes(searchLower)
         );
       })
     : stockData;
 
-  const handleAddHoldClick = async (hold: StockItem) => {
+  const handleAddHoldClick = async (hold: any) => {
     setIsAdding(true);
     try {
       const result = await HandleAddHold(hold, session_data, onHoldAdded);

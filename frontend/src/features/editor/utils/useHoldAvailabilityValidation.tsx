@@ -1,24 +1,11 @@
 import { useEditorAuth } from "../mocks/useEditorAuth";
 
-type SessionDataWithLayout = {
-  id?: string | number;
-  layout?: string | { objects?: Array<{ type?: string; url?: string; [key: string]: unknown }> };
-  [key: string]: unknown;
-};
-
-type StockHold = {
-  id?: string | number;
-  hold_type?: { id?: string | number; model?: string; manufacturer_ref?: string; cdn_ref?: string; manufacturer?: string | { name?: string } };
-  available_count?: number;
-  last_used_wall?: { wall_name?: string; session_name?: string; wall_id?: string | number; session_id?: string | number };
-};
-
 export function useHoldAvailabilityValidation() {
   const { authenticatedFetch, user } = useEditorAuth();
   const API_URL = import.meta.env.VITE_API_BASE;
   const gym_id = user?.related_gym_id;
 
-  const validateHoldAvailability = async (sessionData: SessionDataWithLayout) => {
+  const validateHoldAvailability = async (sessionData: any) => {
     try {
       const stockResponse = await authenticatedFetch(
         `${API_URL}/gym/stock-explore/${gym_id}/?page_size=1000`
@@ -29,7 +16,7 @@ export function useHoldAvailabilityValidation() {
       }
 
       const stockData = await stockResponse.json();
-      const stockHolds: StockHold[] = stockData.holds || [];
+      const stockHolds = stockData.holds || [];
 
       let layout = sessionData.layout;
       if (typeof layout === "string") {
@@ -46,7 +33,7 @@ export function useHoldAvailabilityValidation() {
       }
 
       const requiredHolds: Record<number, number> = {};
-      layout.objects.forEach((obj) => {
+      layout.objects.forEach((obj: any) => {
         if (obj.type === "hold") {
           const holdTypeId = extractHoldTypeIdFromUrl(obj.url);
           if (holdTypeId) {
@@ -61,7 +48,7 @@ export function useHoldAvailabilityValidation() {
 
       const unavailableHolds = [];
       for (const [holdTypeId, requiredCount] of Object.entries(requiredHolds)) {
-        const stockHold = stockHolds.find((h) => h.hold_type?.id == holdTypeId);
+        const stockHold = stockHolds.find((h: any) => h.hold_type?.id == holdTypeId);
         if (!stockHold) {
           unavailableHolds.push({
             hold_type_id: holdTypeId,
@@ -81,11 +68,10 @@ export function useHoldAvailabilityValidation() {
                 stockHold.hold_type?.manufacturer_ref ||
                 stockHold.hold_type?.cdn_ref ||
                 `Hold Type ${holdTypeId}`,
-              manufacturer: (() => {
-                const mfr = stockHold.hold_type?.manufacturer;
-                if (typeof mfr === 'object' && mfr !== null) return mfr.name ?? "Unknown";
-                return (mfr as string | undefined) ?? "Unknown";
-              })(),
+              manufacturer:
+                stockHold.hold_type?.manufacturer?.name ||
+                stockHold.hold_type?.manufacturer ||
+                "Unknown",
               required_count: requiredCount,
               available_count: availableCount,
               current_location:

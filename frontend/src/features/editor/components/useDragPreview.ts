@@ -9,7 +9,7 @@ function calculateHoldRotation(
   upVector: "X" | "Y" | "Z" = "Y"
 ): [number, number, number] {
   try {
-    const faceNormal = normal.clone();
+    let faceNormal = normal.clone();
     faceNormal.transformDirection(surface.matrixWorld);
     faceNormal.normalize();
     if (Math.abs(faceNormal.y) > 0.99) {
@@ -53,7 +53,7 @@ function calculateHoldRotation(
     const finalRotation = new THREE.Euler();
     finalRotation.setFromRotationMatrix(finalRotationMatrix);
     return [finalRotation.x, finalRotation.y, finalRotation.z];
-  } catch {
+  } catch (error) {
     return [-Math.PI / 2, 0, 0];
   }
 }
@@ -160,10 +160,10 @@ export function useDragPreview({
       const q = computeAlignedQuaternion(normal, hit.object);
       setAlignedQuat([q.x, q.y, q.z, q.w]);
       // Compose with customRotation if present
-      const finalQ = q.clone();
+      let finalQ = q.clone();
       let customAngle = 0;
-      if (model && 'customRotation' in model && typeof model.customRotation === "number") {
-        customAngle = model.customRotation;
+      if (model && typeof (model as any).customRotation === "number") {
+        customAngle = (model as any).customRotation;
       }
       if (customAngle) {
         const customQ = new THREE.Quaternion();
@@ -174,7 +174,7 @@ export function useDragPreview({
       // Determine drop target type
       let foundHoldId: string | undefined = undefined;
       let foundWall = false;
-      let o: THREE.Object3D | null = hit.object;
+      let o: any = hit.object;
       while (o) {
         if (o.userData && o.userData.placedObjectId) {
           foundHoldId = o.userData.placedObjectId;
