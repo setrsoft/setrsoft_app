@@ -86,10 +86,10 @@ function EditorApp() {
     const holdModelsGLBURL: string[] = [];
     if (session_data?.related_holds_collection) {
       session_data.holds_collection_instances?.forEach((hold: SessionHoldInstance) => {
-        hold.hold_instance_id = hold.id;
-        holdModels.push(hold);
-        if (hold.hold_type?.glb_url) {
-          holdModelsGLBURL.push(hold.hold_type.glb_url);
+        const holdWithId = { ...hold, hold_instance_id: hold.id };
+        holdModels.push(holdWithId);
+        if (holdWithId.hold_type?.glb_url) {
+          holdModelsGLBURL.push(holdWithId.hold_type.glb_url);
         }
       });
     }
