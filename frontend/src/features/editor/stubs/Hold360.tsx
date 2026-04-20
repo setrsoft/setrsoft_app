@@ -1,11 +1,14 @@
 import { createContext, useContext, useRef, useState, useEffect } from "react";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const HoldScrollContext = createContext<React.RefObject<HTMLElement | null> | null>(null);
 
 const COLS = 6;
 const ROWS = 6;
 const TOTAL_FRAMES = COLS * ROWS;
 const FRAME_INTERVAL_MS = 30;
+
+type HoldWithType = { hold_type?: { sprite_sheet_url?: string } };
 
 export default function Hold360({
   cdn_ref: _cdn_ref,
@@ -14,11 +17,11 @@ export default function Hold360({
   setCurrentDownloadUrl: _setCurrentDownloadUrl,
 }: {
   cdn_ref?: string;
-  hold?: unknown;
+  hold?: HoldWithType;
   className?: string;
   setCurrentDownloadUrl?: (url: string) => void;
 }) {
-  const sprite_sheet_url: string | undefined = (hold as any)?.hold_type?.sprite_sheet_url;
+  const sprite_sheet_url = hold?.hold_type?.sprite_sheet_url;
   const [isVisible, setIsVisible] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [frame, setFrame] = useState(0);

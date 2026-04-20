@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { usePlacementStore } from "../store";
+import type { SessionData } from "../store";
 import { useNavigate } from "react-router-dom";
 import { useEditorAuth } from "../mocks/useEditorAuth";
 import { useTranslation } from "react-i18next";
 import { posthog } from "@/shared/analytics/posthog";
 
-const FileManager = ({ session_data }: { session_data: any }) => {
+const FileManager = ({ session_data }: { session_data: SessionData }) => {
   const objects = usePlacementStore((s) => s.objects);
   const wallColors = usePlacementStore((s) => s.wallColors);
   const holdColors = usePlacementStore((s) => s.holdColors);
@@ -16,15 +17,16 @@ const FileManager = ({ session_data }: { session_data: any }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const cleanObjectsForSave = (objs: typeof objects, data: any) => {
+  const cleanObjectsForSave = (objs: typeof objects, data: SessionData) => {
     return objs.map((obj) => {
-      const cleanedObj = { ...obj } as any;
-      if (cleanedObj.type === "wall" && cleanedObj.url?.startsWith("blob:")) {
+      const cleanedObj: Record<string, unknown> = { ...obj };
+      const url = cleanedObj.url as string | undefined;
+      if (cleanedObj.type === "wall" && url?.startsWith("blob:")) {
         if (data?.related_wall?.id) {
           cleanedObj.wall_id = data.related_wall.id;
         }
         delete cleanedObj.url;
-      } else if (cleanedObj.url?.startsWith("blob:")) {
+      } else if (url?.startsWith("blob:")) {
         delete cleanedObj.url;
       }
       return cleanedObj;

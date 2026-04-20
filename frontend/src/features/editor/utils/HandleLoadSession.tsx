@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 import { useEditorAuth } from "../mocks/useEditorAuth";
 import { usePlacementStore } from "../store";
+import type { SessionData } from "../store";
 
-
-export const useHandleLoadSession = (session_data: any) => {
+export const useHandleLoadSession = (session_data: SessionData) => {
   const { authenticatedFetch } = useEditorAuth();
 
   const setObjects = usePlacementStore((s) => s.setObjects);
@@ -41,9 +41,10 @@ export const useHandleLoadSession = (session_data: any) => {
           const currentObjects = usePlacementStore.getState().objects;
           const existingWall = currentObjects.find((obj) => obj.type === "wall");
 
-          const sessionObjects: any[] = data.objects || [];
-          const sessionWall = sessionObjects.find((obj: any) => obj.type === "wall");
-          const sessionHolds = sessionObjects.filter((obj: any) => obj.type !== "wall");
+          type LayoutObject = { type?: string; url?: string; wall_id?: string; [key: string]: unknown };
+          const sessionObjects: LayoutObject[] = data.objects || [];
+          const sessionWall = sessionObjects.find((obj) => obj.type === "wall");
+          const sessionHolds = sessionObjects.filter((obj) => obj.type !== "wall");
 
           let wallToUse = null;
           if (sessionWall && sessionWall.url) {

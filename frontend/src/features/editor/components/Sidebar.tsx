@@ -2,14 +2,7 @@ import SidebarHoldsSection from "./SidebarHoldsSection";
 import AddHoldModal from "./AddHoldModal";
 import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-
-type HoldModel = {
-  name: string;
-  file: string;
-  hold_type: Record<string, any>;
-  hold_instance_id: string;
-  id?: string;
-};
+import type { HoldModel, SessionData, SessionHoldInstance } from "../store";
 
 const Sidebar = ({
   wallModels: _wallModels,
@@ -17,18 +10,20 @@ const Sidebar = ({
   session_data,
 }: {
   wallModels: string[];
-  holdModels: Array<Record<string, any>>;
-  session_data: any;
+  holdModels: SessionHoldInstance[];
+  session_data: SessionData;
 }) => {
   const { t } = useTranslation();
 
-  const processedHoldModels: HoldModel[] = holdModels.map((hold) => ({
-    name: hold.hold_type.manufacturer_ref,
-    file: hold.hold_type.cdn_ref,
-    hold_type: hold.hold_type,
-    hold_instance_id: hold.id,
-    id: hold.id,
-  }));
+  const processedHoldModels: HoldModel[] = holdModels
+    .filter((hold) => !!hold.hold_type)
+    .map((hold) => ({
+      name: (hold.hold_type!.manufacturer_ref as string | undefined) ?? '',
+      file: (hold.hold_type!.cdn_ref as string | undefined) ?? '',
+      hold_type: hold.hold_type!,
+      hold_instance_id: hold.id,
+      id: hold.id,
+    }));
 
   const holdsSectionRef = useRef<{
     addHold: (hold: HoldModel) => void;
@@ -36,8 +31,10 @@ const Sidebar = ({
   }>(null);
 
   const [addHoldModalOpen, setAddHoldModalOpen] = useState(false);
+  const [locallyAddedHolds, setLocallyAddedHolds] = useState<HoldModel[]>([]);
 
   const handleHoldAddedFromModal = (newHold: HoldModel) => {
+    setLocallyAddedHolds((prev) => [...prev, newHold]);
     if (holdsSectionRef.current) {
       holdsSectionRef.current.addHold(newHold);
     }
@@ -58,9 +55,7 @@ const Sidebar = ({
           onClose={() => setAddHoldModalOpen(false)}
           session_data={session_data}
           onHoldAdded={handleHoldAddedFromModal}
-          currentHolds={
-            holdsSectionRef.current?.getCurrentHolds() || processedHoldModels
-          }
+          currentHolds={[...processedHoldModels, ...locallyAddedHolds]}
         />
 
         <div className="flex gap-2 mt-4">
