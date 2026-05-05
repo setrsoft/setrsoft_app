@@ -124,11 +124,7 @@ function DragPreview() {
           name: holdName,
         });
         if (model.type === 'hold') {
-          posthog.capture({
-            distinctId: 'demo',
-            event: 'hold placed',
-            properties: { hold_name: holdName, has_parent: !!parentId },
-          });
+          posthog.capture('hold placed', { hold_name: holdName, has_parent: !!parentId });
         }
 
         if (selectedObjId) {

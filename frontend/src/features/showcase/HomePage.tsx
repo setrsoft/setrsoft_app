@@ -66,7 +66,7 @@ export function HomePage() {
           <Link
             to={ROUTES.EDITOR}
             className="bg-gradient-to-br from-mint-dim to-mint text-on-primary font-bold px-8 py-3.5 rounded-sm transition-transform hover:scale-105 shadow-lg shadow-mint/20"
-            onClick={() => posthog.capture({ distinctId: 'anonymous', event: 'editor cta clicked', properties: { source: 'hero' } })}
+            onClick={() => posthog.capture('editor cta clicked', { source: 'hero' })}
           >
             {t('hero.test_editor')}
           </Link>

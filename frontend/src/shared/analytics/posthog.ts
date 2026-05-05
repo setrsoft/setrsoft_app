@@ -5,6 +5,7 @@ const host = import.meta.env.VITE_PUBLIC_POSTHOG_HOST as string;
 
 posthog.init(apiKey, {
   api_host: host,
+  ui_host: 'https://eu.posthog.com',
   autocapture: true,
 });
 

@@ -41,12 +41,14 @@ export function useHoldAvailabilityValidation() {
         }
       }
 
-      if (!layout || !layout.objects || layout.objects.length === 0) {
+      type ParsedLayout = { objects?: Array<{ type?: string; url?: string; [key: string]: unknown }> };
+      const parsedLayout = layout as ParsedLayout | null | undefined;
+      if (!parsedLayout || !parsedLayout.objects || parsedLayout.objects.length === 0) {
         return { isValid: true, unavailableHolds: [] };
       }
 
       const requiredHolds: Record<number, number> = {};
-      layout.objects.forEach((obj) => {
+      parsedLayout.objects.forEach((obj) => {
         if (obj.type === "hold") {
           const holdTypeId = extractHoldTypeIdFromUrl(obj.url);
           if (holdTypeId) {
@@ -107,7 +109,7 @@ export function useHoldAvailabilityValidation() {
     }
   };
 
-  const extractHoldTypeIdFromUrl = (url: string) => {
+  const extractHoldTypeIdFromUrl = (url: string | undefined) => {
     if (!url) return null;
     const match = url.match(/\/gym\/getholdfile\/hold\/(\d+)\//);
     return match ? parseInt(match[1]) : null;
