@@ -51,15 +51,11 @@ const FileManager = ({ session_data }: { session_data: SessionData }) => {
 
       alert(t("Layout saved!"));
       setHasUnsavedChanges(false);
-      posthog.capture({
-        distinctId: 'demo',
-        event: 'session layout saved',
-        properties: { session_id: session_data?.id, hold_count: objects.filter((o) => o.type === 'hold').length },
-      });
+      posthog.capture('session layout saved', { session_id: session_data?.id, hold_count: objects.filter((o) => o.type === 'hold').length });
     } catch (err) {
       alert(t("Error saving layout to server"));
       console.error(err);
-      posthog.captureException(err, 'demo', { session_id: session_data?.id });
+      posthog.captureException(err, { session_id: session_data?.id });
     }
   };
 
@@ -80,16 +76,12 @@ const FileManager = ({ session_data }: { session_data: SessionData }) => {
       }
 
       setHasUnsavedChanges(false);
-      posthog.capture({
-        distinctId: 'demo',
-        event: 'session layout saved and exited',
-        properties: { session_id: session_data?.id, hold_count: objects.filter((o) => o.type === 'hold').length },
-      });
+      posthog.capture('session layout saved and exited', { session_id: session_data?.id, hold_count: objects.filter((o) => o.type === 'hold').length });
       navigate("/gym");
     } catch (err) {
       alert(t("Error saving. Cannot exit without saving."));
       console.error(err);
-      posthog.captureException(err, 'demo', { session_id: session_data?.id });
+      posthog.captureException(err, { session_id: session_data?.id });
     }
   };
 
@@ -104,15 +96,11 @@ const FileManager = ({ session_data }: { session_data: SessionData }) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ session_name: sessionName }),
         } as RequestInit);
-        posthog.capture({
-          distinctId: 'demo',
-          event: 'session name updated',
-          properties: { session_id: session_data?.id },
-        });
+        posthog.capture('session name updated', { session_id: session_data?.id });
       } catch (err) {
         alert(t("Error updating session name"));
         console.error(err);
-        posthog.captureException(err, 'demo', { session_id: session_data?.id });
+        posthog.captureException(err, { session_id: session_data?.id });
       }
     })();
   };

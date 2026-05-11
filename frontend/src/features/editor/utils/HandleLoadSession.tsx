@@ -59,7 +59,7 @@ export const useHandleLoadSession = (session_data: SessionData) => {
 
           const newObjects = wallToUse ? [wallToUse, ...sessionHolds] : sessionHolds;
 
-          setObjects(newObjects);
+          setObjects(newObjects as import("../store").PlacedObject[]);
           setWallColors(data.wallColors || {});
           setHoldColors(data.holdColors || {});
           setColoredTextureState(!!data.coloredTexture);
