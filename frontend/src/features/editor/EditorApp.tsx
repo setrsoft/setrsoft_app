@@ -38,6 +38,8 @@ function EditorApp() {
     queryKey: ["wallsession", wallId],
     queryFn: () => fetchWallSession(wallId as string),
     enabled: !!wallId,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 
   const session_data = data?.wall_session || data;
@@ -55,12 +57,10 @@ function EditorApp() {
   }, [wallId, setObjects, setWallColors, setHoldColors, setColoredTexture, setHasUnsavedChanges]);
 
   useEffect(() => {
-    if (session_data?.id && wallModels.length > 0) {
+    if (session_data?.id && wallModels.length > 0 && !sessionOpenedRef.current) {
+      sessionOpenedRef.current = true;
       handleLoad();
-      if (!sessionOpenedRef.current) {
-        sessionOpenedRef.current = true;
-        posthog.capture('editor session opened', { wall_id: wallId, session_id: session_data.id });
-      }
+      posthog.capture('editor session opened', { wall_id: wallId, session_id: session_data.id });
     }
   }, [session_data?.id, wallId, wallModels.length, handleLoad]);
 
