@@ -17,7 +17,7 @@
 
 SetRsoft is an open source community driven software. Test it live on the website http://www.setrsoft.com/ 
 
-For better understanding the purpose of this project you can have a look at [one of those videos](https://www.youtube.com/results?search_query=routesetting+in+climbing+gym).
+For better understanding the purpose of this project you can have a look at [this video made for 42Builders](https://e.pcloud.link/publink/show?code=XZJuQiZvUY5trMn7pXG09SRvvzBpJmPkl5k).
 
 Feel free to create new Github Issues for new features or signal bugs. 
 

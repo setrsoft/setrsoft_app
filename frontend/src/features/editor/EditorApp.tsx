@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -6,6 +6,7 @@ import { posthog } from "@/shared/analytics/posthog";
 
 import useWallSessionQuery from "./utils/WallSessionQuery";
 import { usePlacementStore } from "./store";
+import type { SessionHoldInstance } from "./store";
 import { useHandleLoadSession } from "./utils/HandleLoadSession";
 
 import MainCanvas from "./components/MainCanvas";
@@ -14,15 +15,6 @@ import HoldInspector from "./components/HoldInspector";
 import FileManager from "./components/FileManager";
 import { useTranslation } from "react-i18next";
 import Tutorial from "./components/Tutorial";
-
-interface HoldInstance {
-  id: string;
-  hold_instance_id?: string;
-  hold_type?: {
-    glb_url?: string;
-  };
-  [key: string]: unknown;
-}
 
 const transformTools = [
   { id: "translate", icon: "open_with", label: "Translate", hint: "Shift + Left click" },
@@ -46,6 +38,8 @@ function EditorApp() {
     queryKey: ["wallsession", wallId],
     queryFn: () => fetchWallSession(wallId as string),
     enabled: !!wallId,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 
   const session_data = data?.wall_session || data;
@@ -63,12 +57,10 @@ function EditorApp() {
   }, [wallId, setObjects, setWallColors, setHoldColors, setColoredTexture, setHasUnsavedChanges]);
 
   useEffect(() => {
-    if (session_data?.id && wallModels.length > 0) {
+    if (session_data?.id && wallModels.length > 0 && !sessionOpenedRef.current) {
+      sessionOpenedRef.current = true;
       handleLoad();
-      if (!sessionOpenedRef.current) {
-        sessionOpenedRef.current = true;
-        posthog.capture('editor session opened', { wall_id: wallId, session_id: session_data.id });
-      }
+      posthog.capture('editor session opened', { wall_id: wallId, session_id: session_data.id });
     }
   }, [session_data?.id, wallId, wallModels.length, handleLoad]);
 
@@ -84,23 +76,26 @@ function EditorApp() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges, t]);
 
-  const holdModels: Array<Record<string, HoldInstance>> = [];
-  const holdModelsGLBURL: string[] = [];
-
   useEffect(() => {
     const glbUrl = session_data?.related_wall?.glb_url;
     setWallModels(glbUrl ? [glbUrl] : []);
   }, [session_data?.related_wall?.glb_url]);
 
-  if (session_data?.related_holds_collection) {
-    session_data.holds_collection_instances?.forEach((hold: any) => {
-      hold.hold_instance_id = hold.id;
-      holdModels.push(hold);
-      if (hold.hold_type?.glb_url) {
-        holdModelsGLBURL.push(hold.hold_type.glb_url);
-      }
-    });
-  }
+  const { holdModels, holdModelsGLBURL } = useMemo(() => {
+    const holdModels: SessionHoldInstance[] = [];
+    const glbUrlSet = new Set<string>();
+    if (session_data?.related_holds_collection) {
+      session_data.holds_collection_instances?.forEach((hold: SessionHoldInstance) => {
+        const holdWithId = { ...hold, hold_instance_id: hold.id };
+        holdModels.push(holdWithId);
+        if (holdWithId.hold_type?.glb_url) {
+          glbUrlSet.add(holdWithId.hold_type.glb_url);
+        }
+      });
+    }
+    const holdModelsGLBURL = Array.from(glbUrlSet);
+    return { holdModels, holdModelsGLBURL };
+  }, [session_data?.related_holds_collection, session_data?.holds_collection_instances]);
 
   const { preload } = useGLTF;
   useEffect(() => {
