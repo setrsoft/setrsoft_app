@@ -7,6 +7,7 @@ import {
   useCallback,
 } from "react";
 import { useDragStore, usePlacementStore } from "../store";
+import { useHistoryStore } from "../history";
 import type { HoldModel, SessionData } from "../store";
 import Hold360, { HoldScrollContext } from "../stubs/Hold360";
 import React from "react";
@@ -218,7 +219,10 @@ const SidebarHoldsSection = forwardRef<
           {userColors.map((color: string) => (
             <button
               key={color}
-              onClick={() => setHoldColor(hold.file, color)}
+              onClick={() => {
+                useHistoryStore.getState().record();
+                setHoldColor(hold.file, color);
+              }}
               className={`w-4 h-4 border border-ghost-border cursor-pointer ${
                 holdColors[hold.file] === color
                   ? "ring-2 ring-offset-1 ring-mint ring-offset-surface-low"

@@ -28,6 +28,8 @@
       "stats_forks_label": "Forks"
     },
     "editor": {
+      "undo": "Annuler",
+      "redo": "Rétablir",
       "loading_session": "Chargement de la session mur...",
       "error_session": "Erreur de chargement de la session",
       "unsaved_warning": "Vous avez des modifications non sauvegardées. Voulez-vous vraiment quitter ?",

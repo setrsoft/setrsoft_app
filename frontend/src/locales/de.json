@@ -28,6 +28,8 @@
       "stats_forks_label": "Forks"
     },
     "editor": {
+      "undo": "Rückgängig",
+      "redo": "Wiederholen",
       "loading_session": "Wandsession wird geladen...",
       "error_session": "Fehler beim Laden der Wandsession",
       "unsaved_warning": "Du hast ungespeicherte Änderungen. Möchtest du wirklich die Seite verlassen?",

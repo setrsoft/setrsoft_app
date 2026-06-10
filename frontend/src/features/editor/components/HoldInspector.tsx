@@ -1,14 +1,17 @@
 import React, { useRef } from "react";
 import { usePlacementStore } from "../store";
+import { useHistoryStore } from "../history";
 import { useTranslation } from "react-i18next";
 import { posthog } from "@/shared/analytics/posthog";
 
 function RotationHandle({
   rotation,
   onRotate,
+  onRotateStart,
 }: {
   rotation: number;
   onRotate: (angle: number) => void;
+  onRotateStart?: () => void;
 }) {
   const radius = 24;
   const handleRadius = 18;
@@ -17,6 +20,7 @@ function RotationHandle({
   const handleY = radius + handleRadius * Math.sin(rotation - Math.PI / 2);
   const onPointerDown = (e: React.PointerEvent) => {
     e.preventDefault();
+    onRotateStart?.();
     window.addEventListener("pointermove", onPointerMove as EventListener);
     window.addEventListener("pointerup", onPointerUp as EventListener);
   };
@@ -139,6 +143,7 @@ const HoldInspector = () => {
               onRotate={(angle) =>
                 updateObject(selected.id, { customRotation: angle })
               }
+              onRotateStart={() => useHistoryStore.getState().record()}
             />
           </div>
         </div>
@@ -149,6 +154,7 @@ const HoldInspector = () => {
             className="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
             onClick={() => {
               posthog.capture('hold removed', { hold_name: selected.name, hold_id: selected.id });
+              useHistoryStore.getState().record();
               removeObject(selected.id);
             }}
           >
@@ -206,6 +212,7 @@ const HoldInspector = () => {
                         onRotate={(angle) =>
                           updateObject(child.id, { customRotation: angle })
                         }
+                        onRotateStart={() => useHistoryStore.getState().record()}
                       />
                     </div>
 
@@ -214,6 +221,7 @@ const HoldInspector = () => {
                       title="Delete child hold"
                       onClick={() => {
                         posthog.capture('hold removed', { hold_name: child.name, hold_id: child.id, is_child: true });
+                        useHistoryStore.getState().record();
                         removeObject(child.id);
                       }}
                     >

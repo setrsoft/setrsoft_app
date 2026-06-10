@@ -6,6 +6,7 @@ import { posthog } from "@/shared/analytics/posthog";
 
 import useWallSessionQuery from "./utils/WallSessionQuery";
 import { usePlacementStore } from "./store";
+import { useHistoryStore } from "./history";
 import type { SessionHoldInstance } from "./store";
 import { useHandleLoadSession } from "./utils/HandleLoadSession";
 
@@ -33,6 +34,8 @@ function EditorApp() {
   const setColoredTexture = usePlacementStore((s) => s.setColoredTexture);
   const setHasUnsavedChanges = usePlacementStore((s) => s.setHasUnsavedChanges);
   const hasUnsavedChanges = usePlacementStore((s) => s.hasUnsavedChanges);
+  const canUndo = useHistoryStore((s) => s.past.length > 0);
+  const canRedo = useHistoryStore((s) => s.future.length > 0);
 
   const { data, isLoading, error, isError } = useQuery({
     queryKey: ["wallsession", wallId],
@@ -53,8 +56,33 @@ function EditorApp() {
       setHoldColors({});
       setColoredTexture(true);
       setHasUnsavedChanges(false);
+      useHistoryStore.getState().clear();
     }
   }, [wallId, setObjects, setWallColors, setHoldColors, setColoredTexture, setHasUnsavedChanges]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          useHistoryStore.getState().redo();
+        } else {
+          useHistoryStore.getState().undo();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (session_data?.id && wallModels.length > 0 && !sessionOpenedRef.current) {
@@ -131,6 +159,31 @@ function EditorApp() {
           <div className="absolute top-4 left-4 z-50 flex max-w-[calc(100vw-2rem)] flex-col items-start gap-3">
             <div className="w-fit max-w-full rounded-xl bg-surface-low/90 p-2 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] backdrop-blur-md">
               <FileManager session_data={session_data} />
+            </div>
+            <div className="flex w-fit gap-1 self-start rounded-xl bg-surface-low/90 p-1 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] backdrop-blur-md">
+              {([
+                { id: "undo", icon: "undo", label: t("editor.undo"), hint: "Ctrl+Z", enabled: canUndo, action: () => useHistoryStore.getState().undo() },
+                { id: "redo", icon: "redo", label: t("editor.redo"), hint: "Ctrl+Shift+Z", enabled: canRedo, action: () => useHistoryStore.getState().redo() },
+              ]).map((tool) => (
+                <div key={tool.id} className="group relative">
+                  <button
+                    disabled={!tool.enabled}
+                    onClick={tool.action}
+                    className={`w-10 h-10 flex shrink-0 items-center justify-center rounded-lg transition-all ${
+                      tool.enabled
+                        ? "text-on-surface-variant hover:text-on-surface hover:bg-surface-high active:scale-95 cursor-pointer"
+                        : "text-on-surface-variant opacity-40 cursor-not-allowed"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined">{tool.icon}</span>
+                  </button>
+                  <div className="absolute left-full top-1/2 ml-2 -translate-y-1/2 whitespace-nowrap rounded-lg bg-surface-high px-2.5 py-1.5 text-xs text-on-surface-variant opacity-0 shadow-[0_4px_16px_0_rgba(0,0,0,0.4)] transition-opacity group-hover:opacity-100 pointer-events-none">
+                    <span className="font-medium text-on-surface">{tool.label}</span>
+                    <span className="mx-1.5 opacity-40">·</span>
+                    {tool.hint}
+                  </div>
+                </div>
+              ))}
             </div>
             <div className="flex w-fit flex-col gap-1 self-start rounded-xl bg-surface-low/90 p-1 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] backdrop-blur-md">
               {transformTools.map((tool) => (

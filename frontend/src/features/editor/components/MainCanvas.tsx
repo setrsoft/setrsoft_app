@@ -2,6 +2,7 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Suspense } from "react";
 import { useDragStore, usePlacementStore } from "../store";
+import { useHistoryStore } from "../history";
 import ModelViewer from "./ModelViewer";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import * as THREE from "three";
@@ -112,6 +113,10 @@ function DragPreview() {
           holdName = match ? match[1] : model.url;
         }
         const newId = model.id || uuidv4();
+        // Re-drags (model.id set) are already recorded at drag start, before removeObject
+        if (!model.id) {
+          useHistoryStore.getState().record();
+        }
         addObject({
           id: newId,
           type: model.type,
@@ -298,6 +303,7 @@ function PlacedObjects({
           pointerDownHoldIdRef.current = obj.id;
           dragTimer = window.setTimeout(() => {
             dragStarted = true;
+            useHistoryStore.getState().record();
             removeObject(obj.id);
             startDrag({
               type: obj.type,
