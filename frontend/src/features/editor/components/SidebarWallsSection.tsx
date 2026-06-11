@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { useDragStore, usePlacementStore } from "../store";
+import { useHistoryStore } from "../history";
 import { useTranslation } from "react-i18next";
 
 type WallModel = { name: string; file: string; orientation?: "y-up" | "z-up" };
@@ -110,6 +111,7 @@ const SidebarWallsSection = ({ wallModels }: { wallModels: WallModel[] }) => {
               <input
                 type="color"
                 value={wallColors[wall.file] || "#d9c4ff"}
+                onFocus={() => useHistoryStore.getState().record()}
                 onChange={(e) => setWallColor(wall.file, e.target.value)}
                 className="w-6 h-6 border border-gray-300 cursor-pointer shadow-sm"
                 title={`Pick color for ${wall.name}`}

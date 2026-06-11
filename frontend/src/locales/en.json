@@ -28,6 +28,8 @@
       "stats_forks_label": "Forks"
     },
     "editor": {
+      "undo": "Undo",
+      "redo": "Redo",
       "loading_session": "Loading wall session...",
       "error_session": "Error loading wall session",
       "unsaved_warning": "You have unsaved changes. Are you sure you want to leave?",

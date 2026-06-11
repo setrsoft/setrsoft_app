@@ -28,6 +28,8 @@
       "stats_forks_label": "分叉"
     },
     "editor": {
+      "undo": "撤销",
+      "redo": "重做",
       "loading_session": "正在加载岩壁会话...",
       "error_session": "加载岩壁会话出错",
       "unsaved_warning": "您有未保存的更改。确定要离开吗？",
