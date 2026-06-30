@@ -1,6 +1,6 @@
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { Suspense } from "react";
+import { Suspense, Component } from "react";
 import { useDragStore, usePlacementStore } from "../store";
 import { useHistoryStore } from "../history";
 import ModelViewer from "./ModelViewer";
@@ -10,6 +10,54 @@ import { v4 as uuidv4 } from "uuid";
 import { useDragPreview } from "./useDragPreview";
 import React from "react";
 import { posthog } from "@/shared/analytics/posthog";
+
+/**
+ * Checks if the browser can create a WebGL context.
+ * Uses failIfMajorPerformanceCaveat: false so that software renderers
+ * (Mesa/llvmpipe on Linux) are also accepted.
+ */
+function isWebGLAvailable(): boolean {
+  try {
+    const canvas = document.createElement("canvas");
+    const ctx =
+      canvas.getContext("webgl2", { failIfMajorPerformanceCaveat: false }) ||
+      canvas.getContext("webgl", { failIfMajorPerformanceCaveat: false }) ||
+      canvas.getContext("experimental-webgl", { failIfMajorPerformanceCaveat: false });
+    return !!ctx;
+  } catch {
+    return false;
+  }
+}
+
+interface WebGLErrorBoundaryState {
+  hasError: boolean;
+  errorMessage: string;
+}
+
+/**
+ * Error boundary that catches WebGL context creation failures thrown by
+ * Three.js / React Three Fiber so the rest of the UI stays functional.
+ */
+class WebGLErrorBoundary extends Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  WebGLErrorBoundaryState
+> {
+  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, errorMessage: "" };
+  }
+
+  static getDerivedStateFromError(error: Error): WebGLErrorBoundaryState {
+    return { hasError: true, errorMessage: error.message };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 function DragPreview() {
   const { model, dragging, endDrag } = useDragStore();
@@ -77,7 +125,7 @@ function DragPreview() {
         let parentId: string | null = null;
         let localPos = pos;
         let localQuat = alignedQuat;
-        
+
         // If dropped on a hold, set parentId and compute local transform
         if (dropTarget && dropTarget.type === "hold" && dropTarget.id) {
           parentId = dropTarget.id;
@@ -178,8 +226,8 @@ function DragPreview() {
             model.type === "wall"
               ? wallColors[model.url]
               : model.type === "hold"
-              ? holdColors[model.url]
-              : undefined
+                ? holdColors[model.url]
+                : undefined
           }
           coloredTexture={model.type === "hold" ? coloredTexture : undefined}
         />
@@ -376,8 +424,8 @@ function PlacedObjects({
   }
 
   // Render wall objects (no parentId)
-  const wallObjects = useMemo(() => 
-    objects.filter((o) => o.type === "wall"), 
+  const wallObjects = useMemo(() =>
+    objects.filter((o) => o.type === "wall"),
     [objects]
   );
 
@@ -414,6 +462,7 @@ function PlacedObjects({
 }
 
 const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
+  const [webGLAvailable] = useState<boolean>(() => isWebGLAvailable());
   const [wallLoadCount, setWallLoadCount] = useState(0);
   const [wallBatchSize, setWallBatchSize] = useState(0);
   const [forceLoaded, setForceLoaded] = useState(false);
@@ -449,7 +498,7 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
     }
   }, [wallObjects.length, isWallLoading]);
   const wallAddedRef = useRef<string | null>(null);
-  
+
   useEffect(() => {
     console.log("[MainCanvas] wallModels:", wallModels);
     console.log("[MainCanvas] objects (walls):", objects.filter(o => o.type === "wall"));
@@ -503,6 +552,34 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
 
   const dragging = useDragStore((s) => s.dragging);
 
+  const webGLFallback = (
+    <div className="relative w-full h-full flex items-center justify-center bg-surface">
+      <div className="text-center max-w-md px-8 py-10 rounded-2xl bg-surface-low shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]">
+        <span className="material-symbols-outlined text-5xl text-on-surface-variant mb-4 block">broken_image</span>
+        <h2 className="text-lg font-semibold text-on-surface mb-2">3D viewer unavailable</h2>
+        <p className="text-sm text-on-surface-variant mb-4">
+          Your browser could not create a WebGL context, which is required to display the 3D wall editor.
+          This is usually caused by disabled hardware acceleration or an incompatible graphics driver.
+        </p>
+        <p className="text-xs text-on-surface-variant opacity-60 mb-6">
+          Try enabling hardware acceleration in your browser settings
+          (<strong>Settings → System → Use hardware acceleration when available</strong>)
+          and reload the page.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 rounded-lg bg-surface-high text-on-surface text-sm hover:opacity-80 transition-opacity"
+        >
+          Reload page
+        </button>
+      </div>
+    </div>
+  );
+
+  if (!webGLAvailable) {
+    return webGLFallback;
+  }
+
   return (
     <div className="relative w-full h-full">
       {/* Loading overlay for initial wall loading */}
@@ -515,45 +592,51 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
         </div>
       )}
 
-      <Canvas
-        camera={{ position: [0, 5, 15], fov: 50 }}
-        className="bg-gradient-to-b from-blue-50 to-gray-100"
-      >
-        <ambientLight intensity={0.5} />
-        <directionalLight
-          position={[10, 5, 5]}
-          intensity={1.5}
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-camera-far={50}
-          shadow-camera-left={-20}
-          shadow-camera-right={20}
-          shadow-camera-top={20}
-          shadow-camera-bottom={-20}
-        />
-
-        {/* Floor */}
-        <mesh
-          receiveShadow
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, -0.01, 0]}
+      <WebGLErrorBoundary fallback={webGLFallback}>
+        <Canvas
+          camera={{ position: [0, 5, 15], fov: 50 }}
+          className="bg-gradient-to-b from-blue-50 to-gray-100"
+          gl={{
+            failIfMajorPerformanceCaveat: false,
+            powerPreference: "default",
+          }}
         >
-          <planeGeometry args={[25, 25]} />
-          <meshStandardMaterial color="#e0f2fe" opacity={0.3} transparent />
-        </mesh>
+          <ambientLight intensity={0.5} />
+          <directionalLight
+            position={[10, 5, 5]}
+            intensity={1.5}
+            castShadow
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+            shadow-camera-far={50}
+            shadow-camera-left={-20}
+            shadow-camera-right={20}
+            shadow-camera-top={20}
+            shadow-camera-bottom={-20}
+          />
 
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}>
-          <planeGeometry args={[25, 25, 15, 15]} />
-          <meshBasicMaterial color="#e0f2fe" wireframe />
-        </mesh>
+          {/* Floor */}
+          <mesh
+            receiveShadow
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[0, -0.01, 0]}
+          >
+            <planeGeometry args={[25, 25]} />
+            <meshStandardMaterial color="#e0f2fe" opacity={0.3} transparent />
+          </mesh>
 
-        <Suspense fallback={null}>
-          <PlacedObjects onWallLoadComplete={handleWallLoadComplete} />
-          <DragPreview />
-        </Suspense>
-        <OrbitControls enabled={!dragging} dampingFactor={1} />
-      </Canvas>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}>
+            <planeGeometry args={[25, 25, 15, 15]} />
+            <meshBasicMaterial color="#e0f2fe" wireframe />
+          </mesh>
+
+          <Suspense fallback={null}>
+            <PlacedObjects onWallLoadComplete={handleWallLoadComplete} />
+            <DragPreview />
+          </Suspense>
+          <OrbitControls enabled={!dragging} dampingFactor={1} />
+        </Canvas>
+      </WebGLErrorBoundary>
     </div>
   );
 };
