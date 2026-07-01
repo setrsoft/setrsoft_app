@@ -237,6 +237,17 @@ function DragPreview() {
   );
 }
 
+/**
+ * Fix #3 – DragPreviewGate only mounts DragPreview (and its useFrame loop)
+ * while a sidebar drag is actually in progress. When idle, no useFrame
+ * callback is registered at all.
+ */
+function DragPreviewGate() {
+  const dragging = useDragStore((s) => s.dragging);
+  if (!dragging) return null;
+  return <DragPreview />;
+}
+
 function PlacedObjects({
   onHoldDragState,
   onWallLoadComplete,
@@ -247,26 +258,13 @@ function PlacedObjects({
   const objects = usePlacementStore((s) => s.objects);
   const selectedObjId = usePlacementStore((s) => s.selectedObjId);
   const selectObject = usePlacementStore((s) => s.selectObject);
-  const updateObject = usePlacementStore((s) => s.updateObject);
   const removeObject = usePlacementStore((s) => s.removeObject);
   const wallColors = usePlacementStore((s) => s.wallColors);
   const holdColors = usePlacementStore((s) => s.holdColors);
   const coloredTexture = usePlacementStore((s) => s.coloredTexture);
   const { startDrag } = useDragStore();
-  const dragging = useDragStore((s) => s.dragging);
-  const { camera, scene, gl } = useThree();
-  const [draggingId, setDraggingId] = useState<string | null>(null);
   // Ref to track which hold received pointer down
   const pointerDownHoldIdRef = React.useRef<string | null>(null);
-
-  const draggedObj = useMemo(
-    () => draggingId ? (objects.find((o) => o.id === draggingId) ?? null) : null,
-    [draggingId, objects]
-  );
-  const draggedChildren = useMemo(
-    () => draggedObj ? objects.filter((o) => o.parentId === draggedObj.id).map((o) => o.id) : [],
-    [draggedObj, objects]
-  );
 
   // Find if any hold is selected
   const selectedHold = useMemo(() =>
@@ -278,60 +276,11 @@ function PlacedObjects({
     if (onHoldDragState) onHoldDragState(!!selectedHold);
   }, [selectedHold, onHoldDragState]);
 
-  // Use unified drag preview logic
-  const { pos: previewPos, quat: previewQuat } = useDragPreview({
-    model: draggedObj,
-    camera,
-    scene,
-    gl,
-    excludeObjectId: draggingId || undefined,
-  });
-
-  useEffect(() => {
-    if (!draggingId) return;
-    const handleUp = () => {
-      if (draggedObj) {
-        updateObject(draggingId, {
-          position: previewPos,
-          rotation: previewQuat,
-          customRotation: draggedObj.customRotation, // persist customRotation
-        });
-      }
-      setDraggingId(null);
-      document.body.style.cursor = "grab";
-      window.removeEventListener("mouseup", handleUp);
-      window.removeEventListener("touchend", handleUp);
-    };
-    window.addEventListener("mouseup", handleUp);
-    window.addEventListener("touchend", handleUp);
-    return () => {
-      window.removeEventListener("mouseup", handleUp);
-      window.removeEventListener("touchend", handleUp);
-    };
-  }, [draggingId, draggedObj, previewPos, previewQuat, updateObject]);
-
-  // On drop, re-attach children to new parent id
-  useEffect(() => {
-    if (!dragging && draggedObj && draggedChildren.length > 0) {
-      // Find the new parent id (the just-added object)
-      const newParent = objects.find(
-        (o) =>
-          o.url === draggedObj.url && o.type === draggedObj.type && !o.parentId // top-level
-      );
-      if (newParent) {
-        draggedChildren.forEach((childId) => {
-          updateObject(childId, { parentId: newParent.id });
-        });
-      }
-    }
-  }, [dragging, draggedObj, draggedChildren, objects, updateObject]);
-
   // Helper: recursively render hold tree
   function renderHoldTree(parentId: string | null) {
     return objects
       .filter((o) => o.type === "hold" && o.parentId === parentId && o.url)
       .map((obj) => {
-        if (draggingId && draggingId === obj.id) return null;
         let groupQuaternion = obj.rotation;
         if (typeof obj.customRotation === "number") {
           const baseQ = new THREE.Quaternion(...obj.rotation);
@@ -444,19 +393,7 @@ function PlacedObjects({
       ))}
       {/* Render hold tree (top-level holds) */}
       {renderHoldTree(null)}
-      {/* Drag preview for re-dragged hold */}
-      {draggingId && draggedObj && (
-        <group
-          position={previewPos}
-          quaternion={previewQuat}
-          userData={{ isDragPreview: true }}
-        >
-          <ModelViewer
-            url={draggedObj.url}
-            orientation={draggedObj.orientation}
-          />
-        </group>
-      )}
+
     </>
   );
 }
@@ -606,8 +543,8 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
             position={[10, 5, 5]}
             intensity={1.5}
             castShadow
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
+            shadow-mapSize-width={1024}
+            shadow-mapSize-height={1024}
             shadow-camera-far={50}
             shadow-camera-left={-20}
             shadow-camera-right={20}
@@ -632,7 +569,7 @@ const MainCanvas = ({ wallModels }: { wallModels: string[] }) => {
 
           <Suspense fallback={null}>
             <PlacedObjects onWallLoadComplete={handleWallLoadComplete} />
-            <DragPreview />
+            <DragPreviewGate />
           </Suspense>
           <OrbitControls enabled={!dragging} dampingFactor={1} />
         </Canvas>
